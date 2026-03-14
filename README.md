@@ -23,6 +23,16 @@ Color surcharge       White +€0 · Black +€700 · Blue +€900 · Red +€1,
 
 Every time the user changes any radio button, `updateConfigurator()` reads the three currently-selected values, looks up each price, sums them, and writes the result directly into the DOM — no page reload required.
 
+## Sharing a configuration
+
+Click the **Share configuration** button in the summary panel. A URL is generated with the current selections as query parameters, for example:
+
+```
+index.html?model=Touring&battery=80&color=Blue
+```
+
+Click **Copy link** to copy the URL to the clipboard, then share it with anyone. When the page loads with those parameters, `loadFromURL()` reads them and restores the model, battery, and color automatically before the first render. Any unrecognised or missing value falls back safely to the default (`Urban`, `60`, `White`).
+
 ## Running locally
 
 Open `index.html` in any modern browser. No server or build step is needed.
