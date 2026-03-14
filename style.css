@@ -256,6 +256,63 @@ main {
   background: #2563eb;
 }
 
+/* ─── Share section ──────────────────────────────── */
+.share-button {
+  display: block;
+  width: 100%;
+  padding: 0.85rem;
+  background: #fff;
+  color: #3b82f6;
+  font-size: 1rem;
+  font-weight: 600;
+  border: 2px solid #3b82f6;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.15s;
+  margin-top: 0.5rem;
+}
+
+.share-button:hover {
+  background: #eff6ff;
+}
+
+.share-section {
+  margin-top: 0.75rem;
+}
+
+.share-url-input {
+  display: block;
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.8rem;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  color: #1a1a2e;
+  background: #f8fafc;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.copy-button {
+  display: block;
+  width: 100%;
+  padding: 0.6rem;
+  background: #f0fdf4;
+  color: #16a34a;
+  font-size: 0.9rem;
+  font-weight: 600;
+  border: 2px solid #16a34a;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.copy-button:hover {
+  background: #dcfce7;
+}
+
 /* ─── Footer ─────────────────────────────────────── */
 footer {
   text-align: center;

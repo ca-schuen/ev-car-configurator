@@ -60,6 +60,40 @@ function updateConfigurator() {
   document.getElementById("total-price").textContent = formatEUR(total);
 }
 
+// ── Share configuration ───────────────────────────────────────────────────────
+
+function getValidValue(value, validValues, fallback) {
+  return validValues.indexOf(value) !== -1 ? value : fallback;
+}
+
+function loadFromURL() {
+  const params         = new URLSearchParams(window.location.search);
+  const validModels    = Object.keys(MODEL_PRICES);
+  const validBatteries = Object.keys(BATTERY_SURCHARGES);
+  const validColors    = Object.keys(COLOR_SURCHARGES);
+
+  const model   = getValidValue(params.get("model"),   validModels,    "Urban");
+  const battery = getValidValue(params.get("battery"), validBatteries, "60");
+  const color   = getValidValue(params.get("color"),   validColors,    "White");
+
+  const modelInput   = document.querySelector('input[name="model"][value="'   + model   + '"]');
+  const batteryInput = document.querySelector('input[name="battery"][value="' + battery + '"]');
+  const colorInput   = document.querySelector('input[name="color"][value="'   + color   + '"]');
+
+  if (modelInput)   modelInput.checked   = true;
+  if (batteryInput) batteryInput.checked = true;
+  if (colorInput)   colorInput.checked   = true;
+}
+
+function generateShareURL() {
+  const model   = document.querySelector('input[name="model"]:checked').value;
+  const battery = document.querySelector('input[name="battery"]:checked').value;
+  const color   = document.querySelector('input[name="color"]:checked').value;
+
+  const params = new URLSearchParams({ model: model, battery: battery, color: color });
+  return window.location.origin + window.location.pathname + "?" + params.toString();
+}
+
 // ── Event listeners ───────────────────────────────────────────────────────────
 
 document.querySelectorAll('input[name="model"], input[name="battery"], input[name="color"]')
@@ -67,6 +101,27 @@ document.querySelectorAll('input[name="model"], input[name="battery"], input[nam
     input.addEventListener("change", updateConfigurator);
   });
 
+document.getElementById("share-btn").addEventListener("click", function() {
+  var url = generateShareURL();
+  document.getElementById("share-url").value = url;
+  document.getElementById("share-section").style.display = "block";
+});
+
+document.getElementById("copy-btn").addEventListener("click", function() {
+  var urlInput = document.getElementById("share-url");
+  var copyBtn  = document.getElementById("copy-btn");
+  navigator.clipboard.writeText(urlInput.value).then(function() {
+    copyBtn.textContent = "Copied!";
+    setTimeout(function() { copyBtn.textContent = "Copy link"; }, 2000);
+  }).catch(function() {
+    urlInput.select();
+    copyBtn.textContent = "Copy link";
+    copyBtn.title = "Copy failed — please copy the URL manually";
+    setTimeout(function() { copyBtn.title = ""; }, 3000);
+  });
+});
+
 // ── Initial render ────────────────────────────────────────────────────────────
 
+loadFromURL();
 updateConfigurator();
