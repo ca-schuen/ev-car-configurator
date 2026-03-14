@@ -67,18 +67,18 @@ function getValidValue(value, validValues, fallback) {
 }
 
 function loadFromURL() {
-  var params      = new URLSearchParams(window.location.search);
-  var validModels    = Object.keys(MODEL_PRICES);
-  var validBatteries = Object.keys(BATTERY_SURCHARGES);
-  var validColors    = Object.keys(COLOR_SURCHARGES);
+  const params         = new URLSearchParams(window.location.search);
+  const validModels    = Object.keys(MODEL_PRICES);
+  const validBatteries = Object.keys(BATTERY_SURCHARGES);
+  const validColors    = Object.keys(COLOR_SURCHARGES);
 
-  var model   = getValidValue(params.get("model"),   validModels,    "Urban");
-  var battery = getValidValue(params.get("battery"), validBatteries, "60");
-  var color   = getValidValue(params.get("color"),   validColors,    "White");
+  const model   = getValidValue(params.get("model"),   validModels,    "Urban");
+  const battery = getValidValue(params.get("battery"), validBatteries, "60");
+  const color   = getValidValue(params.get("color"),   validColors,    "White");
 
-  var modelInput   = document.querySelector('input[name="model"][value="'   + model   + '"]');
-  var batteryInput = document.querySelector('input[name="battery"][value="' + battery + '"]');
-  var colorInput   = document.querySelector('input[name="color"][value="'   + color   + '"]');
+  const modelInput   = document.querySelector('input[name="model"][value="'   + model   + '"]');
+  const batteryInput = document.querySelector('input[name="battery"][value="' + battery + '"]');
+  const colorInput   = document.querySelector('input[name="color"][value="'   + color   + '"]');
 
   if (modelInput)   modelInput.checked   = true;
   if (batteryInput) batteryInput.checked = true;
@@ -86,11 +86,11 @@ function loadFromURL() {
 }
 
 function generateShareURL() {
-  var model   = document.querySelector('input[name="model"]:checked').value;
-  var battery = document.querySelector('input[name="battery"]:checked').value;
-  var color   = document.querySelector('input[name="color"]:checked').value;
+  const model   = document.querySelector('input[name="model"]:checked').value;
+  const battery = document.querySelector('input[name="battery"]:checked').value;
+  const color   = document.querySelector('input[name="color"]:checked').value;
 
-  var params = new URLSearchParams({ model: model, battery: battery, color: color });
+  const params = new URLSearchParams({ model: model, battery: battery, color: color });
   return window.location.origin + window.location.pathname + "?" + params.toString();
 }
 
