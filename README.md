@@ -33,4 +33,44 @@ Because the app is entirely static (plain HTML / CSS / JS), it can be hosted on 
 
 ---
 
+## GitHub Copilot team scaffold
+
+This repository uses **GitHub Copilot** as a small specialized software team.
+
+### Repository custom instructions
+
+The file `.github/copilot-instructions.md` contains repository-wide rules that every Copilot session applies automatically — things like "no frameworks", "no build steps", and "always update README". This keeps all AI-assisted work consistent with the project's constraints.
+
+### Custom agent profiles
+
+Three agent profiles live in `.github/agents/`. Each one focuses Copilot on a specific role:
+
+| Agent file | Role |
+|-----------|------|
+| `frontend-builder.agent.md` | UI work — HTML, CSS, JavaScript, responsiveness, UX polish |
+| `reviewer.agent.md` | Code review — correctness, edge cases, minimal fixes |
+| `ops.agent.md` | Automation — GitHub Actions, deployment, repository configuration |
+
+### Intended workflow
+
+```
+New issue
+   │
+   ▼
+Coding agent opens a PR
+   │
+   ▼
+reviewer agent reviews the PR (correctness, edge cases)
+   │
+   ▼
+Human reviews and merges
+```
+
+1. A new issue describes a feature or bug.
+2. A coding agent (e.g. **frontend-builder**) implements the change and opens a PR.
+3. The **reviewer** agent inspects the PR and leaves comments or approves.
+4. A human does a final review and merges.
+
+---
+
 *Voltara is a fictional brand. No real vehicles are sold.*
