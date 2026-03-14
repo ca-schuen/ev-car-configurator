@@ -27,6 +27,10 @@ Every time the user changes any radio button, `updateConfigurator()` reads the t
 
 Open `index.html` in any modern browser. No server or build step is needed.
 
+## CI checks
+
+`.github/workflows/validate.yml` runs on every push to `main` and on every pull request. It checks that the four core files (`index.html`, `style.css`, `app.js`, `README.md`) are all present. The workflow has no dependencies and requires no local setup — it simply fails if any of those files is missing.
+
 ## GitHub Pages
 
 Because the app is entirely static (plain HTML / CSS / JS), it can be hosted on GitHub Pages without any additional configuration: just point GitHub Pages at the repository root on the `main` branch.
