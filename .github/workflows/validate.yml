@@ -1,0 +1,24 @@
+name: Validate required files
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check-files:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@9bb56186c3b09b4f86b1c65136769dd318469633 # v4.1.7
+
+      - name: Check required files exist
+        run: |
+          for file in index.html style.css app.js README.md; do
+            if [ ! -f "$file" ]; then
+              echo "Missing required file: $file"
+              exit 1
+            fi
+            echo "Found: $file"
+          done
