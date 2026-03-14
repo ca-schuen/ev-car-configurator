@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voltara EV Configurator</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div class="brand">⚡ Voltara</div>
+    <div class="tagline">Configure your electric future</div>
+  </header>
+
+  <main>
+    <section class="config-panel">
+      <h2>Build your Voltara Nova</h2>
+
+      <div class="option-group">
+        <label for="model">Model</label>
+        <div class="radio-group" id="model">
+          <label class="radio-card">
+            <input type="radio" name="model" value="Urban" checked />
+            <span class="card-label">Urban</span>
+            <span class="card-price">from €34,900</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="model" value="Touring" />
+            <span class="card-label">Touring</span>
+            <span class="card-price">from €42,900</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="model" value="Performance" />
+            <span class="card-label">Performance</span>
+            <span class="card-price">from €54,900</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <label for="battery">Battery</label>
+        <div class="radio-group" id="battery">
+          <label class="radio-card">
+            <input type="radio" name="battery" value="60" checked />
+            <span class="card-label">60 kWh</span>
+            <span class="card-price">Standard</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="battery" value="80" />
+            <span class="card-label">80 kWh</span>
+            <span class="card-price">+€5,000</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="battery" value="100" />
+            <span class="card-label">100 kWh</span>
+            <span class="card-price">+€11,000</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <label>Color</label>
+        <div class="color-group" id="color">
+          <label class="color-card" title="Alpine White">
+            <input type="radio" name="color" value="White" checked />
+            <span class="color-swatch white"></span>
+            <span class="color-name">Alpine White</span>
+            <span class="card-price">Standard</span>
+          </label>
+          <label class="color-card" title="Midnight Black">
+            <input type="radio" name="color" value="Black" />
+            <span class="color-swatch black"></span>
+            <span class="color-name">Midnight Black</span>
+            <span class="card-price">+€700</span>
+          </label>
+          <label class="color-card" title="Ocean Blue">
+            <input type="radio" name="color" value="Blue" />
+            <span class="color-swatch blue"></span>
+            <span class="color-name">Ocean Blue</span>
+            <span class="card-price">+€900</span>
+          </label>
+          <label class="color-card" title="Racing Red">
+            <input type="radio" name="color" value="Red" />
+            <span class="color-swatch red"></span>
+            <span class="color-name">Racing Red</span>
+            <span class="card-price">+€1,200</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <aside class="summary-panel">
+      <h2>Your Configuration</h2>
+      <ul class="summary-list" id="summary-list">
+        <li><span class="summary-key">Model</span><span class="summary-val" id="sum-model">Urban</span></li>
+        <li><span class="summary-key">Battery</span><span class="summary-val" id="sum-battery">60 kWh</span></li>
+        <li><span class="summary-key">Color</span><span class="summary-val" id="sum-color">Alpine White</span></li>
+        <li class="summary-divider"></li>
+        <li><span class="summary-key">Base price</span><span class="summary-val" id="sum-base">€34,900</span></li>
+        <li><span class="summary-key">Battery option</span><span class="summary-val" id="sum-battery-price">Included</span></li>
+        <li><span class="summary-key">Color option</span><span class="summary-val" id="sum-color-price">Included</span></li>
+      </ul>
+      <div class="total-price">
+        <span>Total</span>
+        <span id="total-price">€34,900</span>
+      </div>
+      <button class="cta-button" onclick="alert('Order placed! 🎉')">Order now</button>
+    </aside>
+  </main>
+
+  <footer>
+    <p>Voltara is a fictional brand · Static demo only · No real vehicles sold</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
