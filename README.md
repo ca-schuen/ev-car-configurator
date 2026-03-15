@@ -57,13 +57,14 @@ The file `.github/copilot-instructions.md` contains repository-wide rules that e
 
 ### Custom agent profiles
 
-Three agent profiles live in `.github/agents/`. Each one focuses Copilot on a specific role:
+Four agent profiles live in `.github/agents/`. Each one focuses Copilot on a specific role:
 
 | Agent file | Role |
 |-----------|------|
 | `frontend-builder.agent.md` | UI work — HTML, CSS, JavaScript, responsiveness, UX polish |
 | `reviewer.agent.md` | Code review — correctness, edge cases, minimal fixes |
 | `ops.agent.md` | Automation — GitHub Actions, deployment, repository configuration |
+| `planner.agent.md` | Planning — breaks work into steps and suggests which agent should handle each part |
 
 ### Intended workflow
 
