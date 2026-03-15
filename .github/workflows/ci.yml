@@ -17,3 +17,9 @@ jobs:
           test -f style.css
           test -f app.js
           test -f README.md
+
+      - name: Run static checks
+        run: |
+          if [ -f tests/static-check.sh ]; then
+            bash tests/static-check.sh
+          fi

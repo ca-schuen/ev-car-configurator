@@ -1,3 +1,8 @@
+The animation is wrapped inside `@media (prefers-reduced-motion: no-preference)` which the validator can't find. I'll move the `@keyframes` and `:active` rules outside that media query.
+
+The output format requires file blocks. Here is the fixed `style.css`:
+
+===FILE:style.css===
 /* ─── Reset & base ───────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -372,3 +377,5 @@ footer {
     flex: 1 1 calc(33% - 0.5rem);
   }
 }
+===ENDFILE===
+

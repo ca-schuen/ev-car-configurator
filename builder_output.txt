@@ -1,3 +1,4 @@
+===FILE:style.css===
 /* ─── Reset & base ───────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -319,23 +320,17 @@ main {
 }
 
 /* ─── Button press animation ─────────────────────── */
-@keyframes btn-press {
-  0%   { transform: scale(1); }
-  40%  { transform: scale(0.95); }
-  100% { transform: scale(1); }
-}
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes btn-press {
+    0%   { transform: scale(1); }
+    40%  { transform: scale(0.95); }
+    100% { transform: scale(1); }
+  }
 
-.cta-button:active,
-.share-button:active,
-.copy-button:active {
-  animation: btn-press 120ms ease-out;
-}
-
-@media (prefers-reduced-motion: reduce) {
   .cta-button:active,
   .share-button:active,
   .copy-button:active {
-    animation: none;
+    animation: btn-press 120ms ease-out;
   }
 }
 
@@ -372,3 +367,5 @@ footer {
     flex: 1 1 calc(33% - 0.5rem);
   }
 }
+===ENDFILE===
+
