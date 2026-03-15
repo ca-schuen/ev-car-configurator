@@ -233,23 +233,25 @@ jobs:
             core.setOutput('pr_number', String(pr.number));
       
       - name: Trigger TDD workflow
-        env:
-          ORCHESTRATOR_TOKEN: ${{ secrets.ORCHESTRATOR_TOKEN }}
-        run: |
-          curl -L \
-            -X POST \
-            -H "Accept: application/vnd.github+json" \
-            -H "Authorization: Bearer ${ORCHESTRATOR_TOKEN}" \
-            -H "X-GitHub-Api-Version: 2022-11-28" \
-            https://api.github.com/repos/${{ github.repository }}/actions/workflows/tdd-from-pr.yml/dispatches \
-            -d @- <<EOF
-          {
-            "ref": "main",
-            "inputs": {
-              "pr_number": "${{ steps.pr.outputs.pr_number }}"
-            }
-          }
-          EOF
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ORCHESTRATOR_TOKEN }}
+          script: |
+            const prNumber = Number('${{ steps.pr.outputs.pr_number }}');
+            const issueNumber = Number('${{ inputs.issue_number }}');
+
+            await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'tdd-from-pr.yml',
+              ref: 'main',
+              inputs: {
+                pr_number: String(prNumber),
+                issue_number: String(issueNumber),
+                attempt: '1',
+                max_attempts: '5'
+              }
+            });
 
       - name: Comment PR link on issue and update labels
         uses: actions/github-script@v7

@@ -7,6 +7,18 @@ on:
         description: "Pull request number to enhance with tests"
         required: true
         type: string
+      issue_number:
+        description: "Linked issue number"
+        required: true
+        type: string
+      attempt:
+        description: "Current loop attempt"
+        required: true
+        type: string
+      max_attempts:
+        description: "Maximum repair/test attempts"
+        required: true
+        type: string
 
 permissions:
   contents: write
@@ -93,11 +105,11 @@ jobs:
           cat >> tdd_prompt.txt <<'EOF'
 
           Task:
-          Add minimal automated validation for the feature in this PR.
+          Add or update minimal automated validation for the feature in this PR.
 
           Preferred approach:
           - Create or update tests/static-check.sh
-          - Optionally update README.md with a short note about the test
+          - Optionally update README.md with a short testing note
           - Keep everything dependency-free
           - Do not introduce npm, frameworks, or a backend
 
@@ -159,51 +171,206 @@ jobs:
           print("Updated files:", ", ".join(written))
           PY
 
-      - name: Make shell test executable if present
-        run: |
-          if [ -f tests/static-check.sh ]; then
-            chmod +x tests/static-check.sh
-          fi
-
-      - name: Run shell test if present
-        run: |
-          if [ -f tests/static-check.sh ]; then
-            ./tests/static-check.sh
-          else
-            echo "No shell test generated."
-          fi
-
-      - name: Commit changes
+      - name: Commit TDD changes if any
+        id: commit_tdd
         run: |
           if git diff --quiet; then
-            echo "No changes were created by the TDD workflow."
-            exit 1
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "No TDD changes were created."
+          else
+            git add .
+            git commit -m "Add/update tests for PR #${{ inputs.pr_number }} via TDD workflow"
+            git push origin "${{ steps.pr.outputs.head_ref }}"
+            echo "changed=true" >> "$GITHUB_OUTPUT"
           fi
-          git add .
-          git commit -m "Add tests for PR #${{ inputs.pr_number }} via TDD workflow"
 
-      - name: Push branch
+      - name: Run shell tests
+        id: run_tests
         run: |
-          git push origin "${{ steps.pr.outputs.head_ref }}"
+          set +e
+          if [ -f tests/static-check.sh ]; then
+            chmod +x tests/static-check.sh
+            ./tests/static-check.sh 2>&1 | tee tdd.log
+            status=${PIPESTATUS[0]}
+          else
+            echo "FAIL: tests/static-check.sh is missing" | tee tdd.log
+            status=1
+          fi
 
-      - name: Comment on PR
+          grep 'FAIL:' tdd.log > fail_lines.txt || true
+          echo "exit_code=$status" >> "$GITHUB_OUTPUT"
+          exit 0
+
+      - name: Comment success on PR and issue
+        if: steps.run_tests.outputs.exit_code == '0'
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const fs = require('fs');
             const pr_number = Number('${{ inputs.pr_number }}');
+            const issue_number = Number('${{ inputs.issue_number }}');
+            const attempt = Number('${{ inputs.attempt }}');
+            const log = fs.readFileSync('tdd.log', 'utf8');
+
+            const prBody = [
+              '## TDD output',
+              '',
+              `Attempt ${attempt}: PASS`,
+              '',
+              'The TDD workflow completed successfully.',
+              '',
+              '```text',
+              log.slice(0, 4000),
+              '```'
+            ].join('\n');
+
+            const issueBody = [
+              '## TDD status',
+              '',
+              `Attempt ${attempt}: PASS`,
+              '',
+              'Validation passed for the current PR branch.'
+            ].join('\n');
 
             await github.rest.issues.createComment({
               owner: context.repo.owner,
               repo: context.repo.repo,
               issue_number: pr_number,
-              body: [
-                '## TDD output',
-                '',
-                'The TDD workflow updated the PR branch with a minimal validation script.',
-                '',
-                'Expected outcome:',
-                '- tests/static-check.sh exists or was updated',
-                '- CI wiring can be added in a later dedicated ops step'
-              ].join('\n')
+              body: prBody
+            });
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              body: issueBody
+            });
+
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number
+            });
+
+            const currentLabels = issue.labels.map(l => l.name);
+            const nextLabels = currentLabels.filter(l => l !== 'state:implementing' && l !== 'state:blocked');
+
+            if (!nextLabels.includes('state:ready-for-review')) {
+              nextLabels.push('state:ready-for-review');
+            }
+
+            await github.rest.issues.setLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              labels: nextLabels
+            });
+
+      - name: Comment failure on PR and issue
+        if: steps.run_tests.outputs.exit_code != '0'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const pr_number = Number('${{ inputs.pr_number }}');
+            const issue_number = Number('${{ inputs.issue_number }}');
+            const attempt = Number('${{ inputs.attempt }}');
+            const maxAttempts = Number('${{ inputs.max_attempts }}');
+            const fails = fs.existsSync('fail_lines.txt') ? fs.readFileSync('fail_lines.txt', 'utf8').trim() : 'No FAIL lines captured.';
+            const log = fs.readFileSync('tdd.log', 'utf8');
+
+            const prBody = [
+              '## TDD output',
+              '',
+              `Attempt ${attempt}: FAIL`,
+              '',
+              'Failed checks:',
+              '```text',
+              fails || 'No FAIL lines captured.',
+              '```',
+              '',
+              'Full test log excerpt:',
+              '```text',
+              log.slice(0, 4000),
+              '```'
+            ].join('\n');
+
+            const issueBody = [
+              '## TDD status',
+              '',
+              `Attempt ${attempt}: FAIL`,
+              '',
+              'Failed checks:',
+              '```text',
+              fails || 'No FAIL lines captured.',
+              '```',
+              '',
+              `Automatic repair will ${attempt < maxAttempts ? 'be triggered' : 'NOT be triggered because max attempts were reached'}.`
+            ].join('\n');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr_number,
+              body: prBody
+            });
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              body: issueBody
+            });
+
+      - name: Trigger repair workflow
+        if: steps.run_tests.outputs.exit_code != '0' && inputs.attempt < inputs.max_attempts
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.ORCHESTRATOR_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const fails = fs.existsSync('fail_lines.txt') ? fs.readFileSync('fail_lines.txt', 'utf8').trim() : 'No FAIL lines captured.';
+
+            await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'repair-pr-from-failures.yml',
+              ref: 'main',
+              inputs: {
+                pr_number: '${{ inputs.pr_number }}',
+                issue_number: '${{ inputs.issue_number }}',
+                attempt: '${{ inputs.attempt }}',
+                max_attempts: '${{ inputs.max_attempts }}',
+                failure_summary: fails
+              }
+            });
+
+      - name: Mark issue blocked after max attempts
+        if: steps.run_tests.outputs.exit_code != '0' && inputs.attempt >= inputs.max_attempts
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = Number('${{ inputs.issue_number }}');
+
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number
+            });
+
+            const currentLabels = issue.labels.map(l => l.name);
+            const nextLabels = currentLabels.filter(l => l !== 'state:implementing' && l !== 'state:ready-for-review');
+
+            if (!nextLabels.includes('state:blocked')) {
+              nextLabels.push('state:blocked');
+            }
+
+            await github.rest.issues.setLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              labels: nextLabels
             });
