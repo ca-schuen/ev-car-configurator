@@ -79,6 +79,59 @@ check ".copy-button exists in markup" \
   "$(contains index.html 'copy-button')"
 
 echo ""
+echo "=== Dark mode toggle (index.html) ==="
+check "dark-mode-toggle button exists in markup" \
+  "$(contains index.html 'dark-mode-toggle')"
+
+check "early theme script present to avoid flash" \
+  "$(contains index.html 'localStorage.getItem(\"theme\")')"
+
+check "data-theme attribute set by early script" \
+  "$(contains index.html 'data-theme')"
+
+echo ""
+echo "=== Dark mode CSS (style.css) ==="
+check "[data-theme=\"dark\"] selector present" \
+  "$(contains style.css '[data-theme="dark"]')"
+
+check "dark mode --color-bg override defined" \
+  "$(contains_re style.css '\[data-theme="dark"\][^{]*\{[^}]*--color-bg')"
+
+check "dark mode --color-surface override defined" \
+  "$(contains_re style.css '\[data-theme="dark"\][^{]*\{[^}]*--color-surface')"
+
+check "#dark-mode-toggle styled in CSS" \
+  "$(contains style.css '#dark-mode-toggle')"
+
+check "dark-mode-toggle included in :active animation rule" \
+  "$(contains style.css '#dark-mode-toggle:active')"
+
+echo ""
+echo "=== Dark mode logic (app.js) ==="
+check "applyTheme function defined" \
+  "$(contains app.js 'function applyTheme')"
+
+check "initDarkMode function defined" \
+  "$(contains app.js 'function initDarkMode')"
+
+check "localStorage used to persist theme" \
+  "$(contains app.js 'localStorage.setItem')"
+
+check "localStorage read to restore theme" \
+  "$(contains app.js 'localStorage.getItem')"
+
+check "data-theme attribute toggled in JS" \
+  "$(contains app.js 'data-theme')"
+
+check "initDarkMode called on startup" \
+  "$(contains app.js 'initDarkMode()')"
+
+echo ""
+echo "=== Dark mode documented (README.md) ==="
+check "dark mode section present in README" \
+  "$(contains README.md 'Dark mode')"
+
+echo ""
 echo "=== Summary ==="
 echo "  Passed: $PASS"
 echo "  Failed: $FAIL"
