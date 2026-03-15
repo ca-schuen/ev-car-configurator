@@ -1,0 +1,215 @@
+name: tdd-from-pr
+
+on:
+  workflow_dispatch:
+    inputs:
+      pr_number:
+        description: "Pull request number to enhance with tests"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  tdd:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Copilot CLI
+        run: npm install -g @github/copilot
+
+      - name: Set up git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch PR metadata
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr_number = Number('${{ inputs.pr_number }}');
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: pr_number
+            });
+
+            core.setOutput('title', pr.title);
+            core.setOutput('body', pr.body || '');
+            core.setOutput('head_ref', pr.head.ref);
+
+      - name: Check out PR branch
+        run: |
+          git fetch origin "${{ steps.pr.outputs.head_ref }}:${{ steps.pr.outputs.head_ref }}"
+          git switch "${{ steps.pr.outputs.head_ref }}"
+
+      - name: Build TDD prompt
+        run: |
+          cat > tdd_prompt.txt <<'EOF'
+          You are the TDD agent for this repository.
+
+          PR title:
+          ${{ steps.pr.outputs.title }}
+
+          PR body:
+          ${{ steps.pr.outputs.body }}
+
+          Current repository context:
+
+          --- README.md ---
+          EOF
+          cat README.md >> tdd_prompt.txt
+          cat >> tdd_prompt.txt <<'EOF'
+
+          --- index.html ---
+          EOF
+          cat index.html >> tdd_prompt.txt
+          cat >> tdd_prompt.txt <<'EOF'
+
+          --- app.js ---
+          EOF
+          cat app.js >> tdd_prompt.txt
+          cat >> tdd_prompt.txt <<'EOF'
+
+          --- style.css ---
+          EOF
+          cat style.css >> tdd_prompt.txt
+          cat >> tdd_prompt.txt <<'EOF'
+
+          --- .github/workflows/ci.yml ---
+          EOF
+          cat .github/workflows/ci.yml >> tdd_prompt.txt
+          cat >> tdd_prompt.txt <<'EOF'
+
+          Task:
+          Add minimal automated validation for the feature in this PR.
+
+          Preferred approach:
+          - Create or update tests/static-check.sh
+          - Update .github/workflows/ci.yml so the test script runs
+          - Keep everything dependency-free
+          - Do not introduce npm, frameworks, or a backend
+
+          Allowed files:
+          - .github/workflows/ci.yml
+          - tests/static-check.sh
+          - README.md
+
+          Output format exactly:
+          ===FILE:path===
+          full file content
+          ===ENDFILE===
+
+          Rules:
+          - Output ONLY file blocks
+          - For each changed file, output the COMPLETE new file content
+          - Do not use markdown fences
+          - Do not add explanations
+          - Do not output unchanged files
+          EOF
+
+      - name: Run Copilot CLI TDD agent
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_ACTIONS_TOKEN }}
+        run: |
+          copilot -p "$(cat tdd_prompt.txt)" -s --no-ask-user --allow-tool='read' > tdd_output.txt
+          echo "Generated TDD output:"
+          sed -n '1,220p' tdd_output.txt
+
+      - name: Write changed files
+        run: |
+          python3 <<'PY'
+          import re
+          import sys
+          from pathlib import Path
+
+          allowed = {".github/workflows/ci.yml", "tests/static-check.sh", "README.md"}
+          text = Path("tdd_output.txt").read_text(encoding="utf-8")
+
+          pattern = re.compile(r"^===FILE:(.+?)===\n(.*?)\n===ENDFILE===\s*$", re.MULTILINE | re.DOTALL)
+          matches = pattern.findall(text)
+
+          if not matches:
+              print("No valid file blocks were found in TDD output.")
+              sys.exit(1)
+
+          written = []
+
+          for raw_path, content in matches:
+              path = raw_path.strip()
+              if path not in allowed:
+                  print(f"Disallowed file in output: {path}")
+                  sys.exit(1)
+
+              p = Path(path)
+              p.parent.mkdir(parents=True, exist_ok=True)
+              p.write_text(content, encoding="utf-8")
+              written.append(path)
+
+          print("Updated files:", ", ".join(written))
+          PY
+
+      - name: Make shell test executable if present
+        run: |
+          if [ -f tests/static-check.sh ]; then
+            chmod +x tests/static-check.sh
+          fi
+
+      - name: Run shell test if present
+        run: |
+          if [ -f tests/static-check.sh ]; then
+            ./tests/static-check.sh
+          else
+            echo "No shell test generated."
+          fi
+
+      - name: Commit changes
+        run: |
+          if git diff --quiet; then
+            echo "No changes were created by the TDD workflow."
+            exit 1
+          fi
+          git add .
+          git commit -m "Add tests for PR #${{ inputs.pr_number }} via TDD workflow"
+
+      - name: Push branch
+        run: |
+          git push origin "${{ steps.pr.outputs.head_ref }}"
+
+      - name: Comment on PR
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr_number = Number('${{ inputs.pr_number }}');
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: pr_number,
+              body: [
+                '## TDD output',
+                '',
+                'The TDD workflow updated the PR branch with minimal automated validation.',
+                '',
+                'Expected outcome:',
+                '- tests/static-check.sh exists or was updated',
+                '- CI can run this validation on future pushes'
+              ].join('\n')
+            });
