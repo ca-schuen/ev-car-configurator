@@ -92,22 +92,16 @@ jobs:
           cat style.css >> tdd_prompt.txt
           cat >> tdd_prompt.txt <<'EOF'
 
-          --- .github/workflows/ci.yml ---
-          EOF
-          cat .github/workflows/ci.yml >> tdd_prompt.txt
-          cat >> tdd_prompt.txt <<'EOF'
-
           Task:
           Add minimal automated validation for the feature in this PR.
 
           Preferred approach:
           - Create or update tests/static-check.sh
-          - Update .github/workflows/ci.yml so the test script runs
+          - Optionally update README.md with a short note about the test
           - Keep everything dependency-free
           - Do not introduce npm, frameworks, or a backend
 
           Allowed files:
-          - .github/workflows/ci.yml
           - tests/static-check.sh
           - README.md
 
@@ -139,7 +133,7 @@ jobs:
           import sys
           from pathlib import Path
 
-          allowed = {".github/workflows/ci.yml", "tests/static-check.sh", "README.md"}
+          allowed = {"tests/static-check.sh", "README.md"}
           text = Path("tdd_output.txt").read_text(encoding="utf-8")
 
           pattern = re.compile(r"^===FILE:(.+?)===\n(.*?)\n===ENDFILE===\s*$", re.MULTILINE | re.DOTALL)
@@ -206,10 +200,10 @@ jobs:
               body: [
                 '## TDD output',
                 '',
-                'The TDD workflow updated the PR branch with minimal automated validation.',
+                'The TDD workflow updated the PR branch with a minimal validation script.',
                 '',
                 'Expected outcome:',
                 '- tests/static-check.sh exists or was updated',
-                '- CI can run this validation on future pushes'
+                '- CI wiring can be added in a later dedicated ops step'
               ].join('\n')
             });
