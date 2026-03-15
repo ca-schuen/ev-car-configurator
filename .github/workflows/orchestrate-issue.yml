@@ -1,0 +1,128 @@
+name: orchestrate-issue
+
+on:
+  issues:
+    types: [opened, edited]
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  planner:
+    if: contains(join(github.event.issue.labels.*.name, ','), 'type:feature')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+
+      - name: Install Copilot CLI
+        run: npm install -g @github/copilot
+
+      - name: Build planner prompt
+        shell: bash
+        run: |
+          python3 <<'PY'
+          import json
+          import os
+          from pathlib import Path
+
+          event_path = os.environ["GITHUB_EVENT_PATH"]
+          with open(event_path, "r", encoding="utf-8") as f:
+              event = json.load(f)
+
+          issue = event["issue"]
+          title = issue["title"]
+          body = issue.get("body") or ""
+          number = issue["number"]
+
+          def read_text(path):
+              p = Path(path)
+              if p.exists():
+                  return p.read_text(encoding="utf-8")
+              return f"[MISSING FILE: {path}]"
+
+          prompt = f"""You are the Planner agent for this repository.
+
+Repository: {os.environ.get("GITHUB_REPOSITORY", "")}
+Issue number: #{number}
+Issue title: {title}
+
+Issue body:
+{body}
+
+Current repository context:
+
+--- README.md ---
+{read_text("README.md")}
+
+--- index.html ---
+{read_text("index.html")}
+
+--- app.js ---
+{read_text("app.js")}
+
+--- style.css ---
+{read_text("style.css")}
+
+Task:
+Write a concise implementation plan for this issue.
+
+Rules:
+- Output Markdown only
+- Start with: ## Planner output
+- Include these sections:
+  1. Summary
+  2. Scope
+  3. Affected files
+  4. Implementation steps
+  5. Test/validation ideas
+  6. Risks / edge cases
+- Keep it practical and short
+- Do not write code
+- Assume this repo should stay simple and static unless the issue clearly requires more
+"""
+
+          Path("planner_prompt.txt").write_text(prompt, encoding="utf-8")
+          PY
+
+      - name: Run Copilot CLI planner
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_ACTIONS_TOKEN }}
+        run: |
+          copilot -p "$(cat planner_prompt.txt)" --no-ask-user > plan.md
+          cat plan.md >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Comment plan on issue and update labels
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const plan = fs.readFileSync('plan.md', 'utf8');
+            const issue_number = context.payload.issue.number;
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              body: plan
+            });
+
+            const currentLabels = context.payload.issue.labels.map(l => l.name);
+            const nextLabels = currentLabels.filter(l => l !== 'state:needs-plan');
+
+            if (!nextLabels.includes('state:planned')) {
+              nextLabels.push('state:planned');
+            }
+
+            await github.rest.issues.setLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              labels: nextLabels
+            });
