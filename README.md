@@ -28,10 +28,10 @@ Every time the user changes any radio button, `updateConfigurator()` reads the t
 Click the **Share configuration** button in the summary panel. A URL is generated with the current selections as query parameters, for example:
 
 ```
-index.html?model=Touring&battery=80&color=Blue
+index.html?model=touring&battery=80&color=blue
 ```
 
-Click **Copy link** to copy the URL to the clipboard, then share it with anyone. When the page loads with those parameters, `loadFromURL()` reads them and restores the model, battery, and color automatically before the first render. Any unrecognised or missing value falls back safely to the default (`Urban`, `60`, `White`).
+Click **Copy link** to copy the URL to the clipboard, then share it with anyone. When the page loads with those parameters, `loadFromURL()` reads them and restores the model, battery, and color automatically before the first render. URLs are parsed case-insensitively, so `Touring` and `touring` both work. Any unrecognised or missing value falls back safely to the default (`Urban`, `60`, `White`).
 
 ## Running locally
 
@@ -57,13 +57,14 @@ The file `.github/copilot-instructions.md` contains repository-wide rules that e
 
 ### Custom agent profiles
 
-Three agent profiles live in `.github/agents/`. Each one focuses Copilot on a specific role:
+Four agent profiles live in `.github/agents/`. Each one focuses Copilot on a specific role:
 
 | Agent file | Role |
 |-----------|------|
 | `frontend-builder.agent.md` | UI work — HTML, CSS, JavaScript, responsiveness, UX polish |
 | `reviewer.agent.md` | Code review — correctness, edge cases, minimal fixes |
 | `ops.agent.md` | Automation — GitHub Actions, deployment, repository configuration |
+| `planner.agent.md` | Planning — breaks work into steps and suggests which agent should handle each part |
 
 ### Intended workflow
 
