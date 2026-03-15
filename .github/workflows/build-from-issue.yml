@@ -1,0 +1,228 @@
+name: build-from-issue
+
+on:
+  workflow_dispatch:
+    inputs:
+      issue_number:
+        description: "Issue number to implement"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+  pull-requests: write
+  issues: write
+
+jobs:
+  builder:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install Copilot CLI
+        run: npm install -g @github/copilot
+
+      - name: Set up git identity
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Fetch issue and planner comment
+        id: issue
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = Number('${{ inputs.issue_number }}');
+
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number
+            });
+
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              per_page: 100
+            });
+
+            const plannerComment = [...comments].reverse().find(c =>
+              typeof c.body === 'string' && c.body.includes('## Planner output')
+            );
+
+            core.setOutput('issue_title', issue.title);
+            core.setOutput('issue_body', issue.body || '');
+            core.setOutput('planner_comment', plannerComment ? plannerComment.body : '');
+
+      - name: Create working branch
+        id: branch
+        run: |
+          BRANCH="auto/issue-${{ inputs.issue_number }}-builder"
+          git switch -c "$BRANCH"
+          echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
+
+      - name: Build builder prompt
+        run: |
+          cat > builder_prompt.txt <<'EOF'
+          You are the Builder agent for this repository.
+
+          Repository: ${{ github.repository }}
+          Issue number: #${{ inputs.issue_number }}
+
+          Issue title:
+          ${{ steps.issue.outputs.issue_title }}
+
+          Issue body:
+          ${{ steps.issue.outputs.issue_body }}
+
+          Planner output:
+          ${{ steps.issue.outputs.planner_comment }}
+
+          Current repository context:
+
+          --- README.md ---
+          EOF
+          cat README.md >> builder_prompt.txt
+          cat >> builder_prompt.txt <<'EOF'
+
+          --- index.html ---
+          EOF
+          cat index.html >> builder_prompt.txt
+          cat >> builder_prompt.txt <<'EOF'
+
+          --- app.js ---
+          EOF
+          cat app.js >> builder_prompt.txt
+          cat >> builder_prompt.txt <<'EOF'
+
+          --- style.css ---
+          EOF
+          cat style.css >> builder_prompt.txt
+          cat >> builder_prompt.txt <<'EOF'
+
+          Task:
+          Implement the issue by producing a valid unified diff patch.
+
+          Rules:
+          - Output ONLY a unified diff patch
+          - Do not add explanations
+          - Keep the repo simple and static
+          - No framework
+          - No package manager
+          - No backend
+          - Modify only files that are necessary
+          EOF
+
+      - name: Run Copilot CLI builder
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_ACTIONS_TOKEN }}
+        run: |
+          copilot -p "$(cat builder_prompt.txt)" -s --no-ask-user --allow-tool='read' > builder.patch
+          echo "Generated patch:"
+          sed -n '1,200p' builder.patch
+
+      - name: Apply patch
+        run: |
+          git apply --reject --whitespace=fix builder.patch
+
+      - name: Validate required files still exist
+        run: |
+          test -f index.html
+          test -f style.css
+          test -f app.js
+          test -f README.md
+
+      - name: Commit changes
+        run: |
+          if git diff --quiet; then
+            echo "No changes were created by the builder."
+            exit 1
+          fi
+          git add .
+          git commit -m "Implement issue #${{ inputs.issue_number }} via builder workflow"
+
+      - name: Push branch
+        run: |
+          git push --set-upstream origin "${{ steps.branch.outputs.branch }}"
+
+      - name: Create draft PR
+        id: pr
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = Number('${{ inputs.issue_number }}');
+            const head = '${{ steps.branch.outputs.branch }}';
+
+            const { data: pr } = await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              title: `Implement issue #${issue_number}: ${{ steps.issue.outputs.issue_title }}`,
+              head,
+              base: 'main',
+              body: [
+                `Implements #${issue_number}.`,
+                '',
+                'Created automatically by the builder workflow.',
+                '',
+                'Next steps:',
+                '- CI runs on this PR',
+                '- human review',
+                '- later: TDD and ops automation'
+              ].join('\n'),
+              draft: true
+            });
+
+            core.setOutput('pr_url', pr.html_url);
+
+      - name: Comment PR link on issue and update labels
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const issue_number = Number('${{ inputs.issue_number }}');
+            const prUrl = '${{ steps.pr.outputs.pr_url }}';
+
+            await github.rest.issues.createComment({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              body: [
+                '## Builder output',
+                '',
+                `Draft PR created: ${prUrl}`,
+                '',
+                'The builder workflow generated a patch, applied it, committed it, and opened a draft PR.'
+              ].join('\n')
+            });
+
+            const { data: issue } = await github.rest.issues.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number
+            });
+
+            const currentLabels = issue.labels.map(l => l.name);
+            const nextLabels = currentLabels.filter(l => l !== 'state:planned');
+
+            if (!nextLabels.includes('state:implementing')) {
+              nextLabels.push('state:implementing');
+            }
+
+            await github.rest.issues.setLabels({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number,
+              labels: nextLabels
+            });
