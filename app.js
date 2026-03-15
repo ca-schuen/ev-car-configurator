@@ -26,6 +26,10 @@ const COLOR_LABELS = {
   Red:   "Racing Red",
 };
 
+const SLUG_TO_MODEL   = { urban: "Urban", touring: "Touring", performance: "Performance" };
+const SLUG_TO_BATTERY = { "60": "60", "80": "80", "100": "100" };
+const SLUG_TO_COLOR   = { white: "White", black: "Black", blue: "Blue", red: "Red" };
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 function formatEUR(amount) {
@@ -62,19 +66,18 @@ function updateConfigurator() {
 
 // ── Share configuration ───────────────────────────────────────────────────────
 
-function getValidValue(value, validValues, fallback) {
-  return validValues.indexOf(value) !== -1 ? value : fallback;
+function getValidSlug(raw, slugMap, fallback) {
+  if (raw === null) return fallback;
+  var resolved = slugMap[raw.toLowerCase()];
+  return resolved !== undefined ? resolved : fallback;
 }
 
 function loadFromURL() {
-  const params         = new URLSearchParams(window.location.search);
-  const validModels    = Object.keys(MODEL_PRICES);
-  const validBatteries = Object.keys(BATTERY_SURCHARGES);
-  const validColors    = Object.keys(COLOR_SURCHARGES);
+  const params = new URLSearchParams(window.location.search);
 
-  const model   = getValidValue(params.get("model"),   validModels,    "Urban");
-  const battery = getValidValue(params.get("battery"), validBatteries, "60");
-  const color   = getValidValue(params.get("color"),   validColors,    "White");
+  const model   = getValidSlug(params.get("model"),   SLUG_TO_MODEL,   "Urban");
+  const battery = getValidSlug(params.get("battery"), SLUG_TO_BATTERY, "60");
+  const color   = getValidSlug(params.get("color"),   SLUG_TO_COLOR,   "White");
 
   const modelInput   = document.querySelector('input[name="model"][value="'   + model   + '"]');
   const batteryInput = document.querySelector('input[name="battery"][value="' + battery + '"]');
@@ -90,7 +93,7 @@ function generateShareURL() {
   const battery = document.querySelector('input[name="battery"]:checked').value;
   const color   = document.querySelector('input[name="color"]:checked').value;
 
-  const params = new URLSearchParams({ model: model, battery: battery, color: color });
+  const params = new URLSearchParams({ model: model.toLowerCase(), battery: battery, color: color.toLowerCase() });
   return window.location.origin + window.location.pathname + "?" + params.toString();
 }
 
@@ -103,16 +106,23 @@ document.querySelectorAll('input[name="model"], input[name="battery"], input[nam
 
 document.getElementById("share-btn").addEventListener("click", function() {
   var url = generateShareURL();
-  document.getElementById("share-url").value = url;
+  var urlInput = document.getElementById("share-url");
+  urlInput.value = url;
   document.getElementById("share-section").style.display = "block";
+  urlInput.focus();
+  urlInput.select();
 });
 
 document.getElementById("copy-btn").addEventListener("click", function() {
   var urlInput = document.getElementById("share-url");
   var copyBtn  = document.getElementById("copy-btn");
   navigator.clipboard.writeText(urlInput.value).then(function() {
-    copyBtn.textContent = "Copied!";
-    setTimeout(function() { copyBtn.textContent = "Copy link"; }, 2000);
+    copyBtn.classList.add("copied");
+    copyBtn.textContent = "✓ Copied!";
+    setTimeout(function() {
+      copyBtn.classList.remove("copied");
+      copyBtn.textContent = "Copy link";
+    }, 2000);
   }).catch(function() {
     urlInput.select();
     copyBtn.textContent = "Copy link";

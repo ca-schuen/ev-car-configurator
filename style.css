@@ -313,6 +313,12 @@ main {
   background: #dcfce7;
 }
 
+.copy-button.copied {
+  background: #16a34a;
+  color: #fff;
+  border-color: #16a34a;
+}
+
 /* ─── Footer ─────────────────────────────────────── */
 footer {
   text-align: center;
