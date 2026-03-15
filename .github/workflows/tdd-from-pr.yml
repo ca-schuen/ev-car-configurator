@@ -325,13 +325,20 @@ jobs:
             });
 
       - name: Trigger repair workflow
-        if: steps.run_tests.outputs.exit_code != '0' && inputs.attempt < inputs.max_attempts
+        if: steps.run_tests.outputs.exit_code != '0' && fromJSON(inputs.attempt) < fromJSON(inputs.max_attempts)
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.ORCHESTRATOR_TOKEN }}
           script: |
             const fs = require('fs');
-            const fails = fs.existsSync('fail_lines.txt') ? fs.readFileSync('fail_lines.txt', 'utf8').trim() : 'No FAIL lines captured.';
+
+            let fails = 'No FAIL lines captured.';
+            if (fs.existsSync('fail_lines.txt')) {
+              const raw = fs.readFileSync('fail_lines.txt', 'utf8').trim();
+              if (raw.length > 0) {
+                fails = raw;
+              }
+            }
 
             await github.request('POST /repos/{owner}/{repo}/actions/workflows/{workflow_id}/dispatches', {
               owner: context.repo.owner,
@@ -348,7 +355,7 @@ jobs:
             });
 
       - name: Mark issue blocked after max attempts
-        if: steps.run_tests.outputs.exit_code != '0' && inputs.attempt >= inputs.max_attempts
+        if: steps.run_tests.outputs.exit_code != '0' && fromJSON(inputs.attempt) >= fromJSON(inputs.max_attempts)
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
