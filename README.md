@@ -8,7 +8,7 @@ A tiny fictional electric-vehicle configurator built as a static demo — no bui
 |------|---------|
 | `index.html` | Page markup — header, option cards (model / battery / color), and a live summary sidebar |
 | `style.css` | All styling — responsive layout, card components, color swatches, and the summary panel |
-| `app.js` | Pricing logic and live DOM updates |
+| `app.js` | Pricing logic, live DOM updates, and dark mode logic |
 | `README.md` | This file |
 | `tests/static-check.sh` | Dependency-free shell script that validates required files and expected code patterns |
 
@@ -23,6 +23,14 @@ Color surcharge       White +€0 · Black +€700 · Blue +€900 · Red +€1,
 ```
 
 Every time the user changes any radio button, `updateConfigurator()` reads the three currently-selected values, looks up each price, sums them, and writes the result directly into the DOM — no page reload required.
+
+## Dark mode
+
+A **🌙 Dark / ☀️ Light** toggle button in the page header switches between light and dark themes.
+
+- On first load, the theme defaults to the user's system preference (`prefers-color-scheme`).
+- Once toggled, the chosen theme is saved in `localStorage` under the key `"theme"` and restored on every subsequent visit.
+- The `data-theme` attribute is set on `<body>`; CSS custom properties (`--bg`, `--text`, `--card-bg`, etc.) drive all colour changes.
 
 ## Sharing a configuration
 

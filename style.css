@@ -1,3 +1,54 @@
+/* ─── CSS custom properties (light theme) ───────── */
+:root {
+  --bg:           #f4f6f9;
+  --text:         #1a1a2e;
+  --header-bg:    #1a1a2e;
+  --header-text:  #fff;
+  --brand-color:  #7ecfff;
+  --tagline:      #a0aec0;
+  --card-bg:      #fff;
+  --card-border:  #e2e8f0;
+  --card-hover:   #93c5fd;
+  --label-muted:  #718096;
+  --panel-shadow: rgba(0,0,0,0.08);
+  --divider:      #e2e8f0;
+  --list-divider: #f0f0f0;
+  --total-bg:     #1a1a2e;
+  --total-text:   #fff;
+  --total-price:  #7ecfff;
+  --footer-bg:    #fff;
+  --footer-border:#e2e8f0;
+  --input-bg:     #f8fafc;
+  --input-border: #e2e8f0;
+  --input-text:   #1a1a2e;
+  --swatch-white-border: rgba(0,0,0,0.12);
+}
+
+[data-theme="dark"] {
+  --bg:           #0f1117;
+  --text:         #e2e8f0;
+  --header-bg:    #1a1a2e;
+  --header-text:  #fff;
+  --brand-color:  #7ecfff;
+  --tagline:      #a0aec0;
+  --card-bg:      #1e2130;
+  --card-border:  #2d3348;
+  --card-hover:   #4a6fa5;
+  --label-muted:  #a0aec0;
+  --panel-shadow: rgba(0,0,0,0.3);
+  --divider:      #2d3348;
+  --list-divider: #2d3348;
+  --total-bg:     #0f1117;
+  --total-text:   #e2e8f0;
+  --total-price:  #7ecfff;
+  --footer-bg:    #1e2130;
+  --footer-border:#2d3348;
+  --input-bg:     #0f1117;
+  --input-border: #2d3348;
+  --input-text:   #e2e8f0;
+  --swatch-white-border: rgba(255,255,255,0.4);
+}
+
 /* ─── Reset & base ───────────────────────────────── */
 *, *::before, *::after {
   box-sizing: border-box;
@@ -7,8 +58,8 @@
 
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: #f4f6f9;
-  color: #1a1a2e;
+  background: var(--bg);
+  color: var(--text);
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -16,11 +67,11 @@ body {
 
 /* ─── Header ─────────────────────────────────────── */
 header {
-  background: #1a1a2e;
-  color: #fff;
+  background: var(--header-bg);
+  color: var(--header-text);
   padding: 1.25rem 2rem;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 1rem;
 }
 
@@ -28,12 +79,32 @@ header {
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: #7ecfff;
+  color: var(--brand-color);
 }
 
 .tagline {
   font-size: 0.9rem;
-  color: #a0aec0;
+  color: var(--tagline);
+  flex: 1;
+}
+
+/* ─── Dark mode toggle button ────────────────────── */
+#dark-mode-btn {
+  margin-left: auto;
+  background: transparent;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 1rem;
+  padding: 0.35rem 0.75rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  white-space: nowrap;
+}
+
+#dark-mode-btn:hover {
+  border-color: rgba(255,255,255,0.7);
+  background: rgba(255,255,255,0.08);
 }
 
 /* ─── Main layout ────────────────────────────────── */
@@ -58,7 +129,7 @@ main {
   font-size: 1.15rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: #1a1a2e;
+  color: var(--text);
 }
 
 .option-group {
@@ -71,7 +142,7 @@ main {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #718096;
+  color: var(--label-muted);
   margin-bottom: 0.65rem;
 }
 
@@ -87,11 +158,11 @@ main {
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--card-border);
   border-radius: 10px;
   padding: 0.85rem 1.2rem;
   cursor: pointer;
-  background: #fff;
+  background: var(--card-bg);
   transition: border-color 0.15s, box-shadow 0.15s;
   min-width: 110px;
   text-align: center;
@@ -107,7 +178,7 @@ main {
 }
 
 .radio-card:hover {
-  border-color: #93c5fd;
+  border-color: var(--card-hover);
 }
 
 .card-label {
@@ -117,7 +188,7 @@ main {
 
 .card-price {
   font-size: 0.78rem;
-  color: #718096;
+  color: var(--label-muted);
 }
 
 /* ─── Color picker ───────────────────────────────── */
@@ -132,11 +203,11 @@ main {
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid var(--card-border);
   border-radius: 10px;
   padding: 0.75rem 1rem;
   cursor: pointer;
-  background: #fff;
+  background: var(--card-bg);
   transition: border-color 0.15s, box-shadow 0.15s;
   min-width: 90px;
   text-align: center;
@@ -152,14 +223,14 @@ main {
 }
 
 .color-card:hover {
-  border-color: #93c5fd;
+  border-color: var(--card-hover);
 }
 
 .color-swatch {
   width: 36px;
   height: 36px;
   border-radius: 50%;
-  border: 2px solid rgba(0,0,0,0.12);
+  border: 2px solid var(--swatch-white-border);
   display: block;
 }
 
@@ -167,6 +238,10 @@ main {
 .color-swatch.black  { background: #1a1a2e; }
 .color-swatch.blue   { background: #2563eb; }
 .color-swatch.red    { background: #dc2626; }
+
+[data-theme="dark"] .color-swatch.white {
+  border-color: rgba(255,255,255,0.45);
+}
 
 .color-name {
   font-size: 0.8rem;
@@ -177,10 +252,10 @@ main {
 .summary-panel {
   width: 300px;
   flex-shrink: 0;
-  background: #fff;
+  background: var(--card-bg);
   border-radius: 14px;
   padding: 1.5rem;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+  box-shadow: 0 1px 4px var(--panel-shadow);
   align-self: flex-start;
   position: sticky;
   top: 1.5rem;
@@ -196,7 +271,7 @@ main {
   justify-content: space-between;
   padding: 0.45rem 0;
   font-size: 0.9rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid var(--list-divider);
 }
 
 .summary-list li:last-child {
@@ -204,7 +279,7 @@ main {
 }
 
 .summary-key {
-  color: #718096;
+  color: var(--label-muted);
 }
 
 .summary-val {
@@ -215,7 +290,7 @@ main {
 .summary-divider {
   height: 0;
   border: none;
-  border-top: 2px solid #e2e8f0 !important;
+  border-top: 2px solid var(--divider) !important;
   padding: 0 !important;
   margin: 0.25rem 0;
 }
@@ -224,8 +299,8 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #1a1a2e;
-  color: #fff;
+  background: var(--total-bg);
+  color: var(--total-text);
   border-radius: 10px;
   padding: 0.85rem 1rem;
   margin-bottom: 1rem;
@@ -235,7 +310,7 @@ main {
 
 #total-price {
   font-size: 1.3rem;
-  color: #7ecfff;
+  color: var(--total-price);
 }
 
 .cta-button {
@@ -261,7 +336,7 @@ main {
   display: block;
   width: 100%;
   padding: 0.85rem;
-  background: #fff;
+  background: var(--card-bg);
   color: #3b82f6;
   font-size: 1rem;
   font-weight: 600;
@@ -273,7 +348,7 @@ main {
 }
 
 .share-button:hover {
-  background: #eff6ff;
+  background: var(--bg);
 }
 
 .share-section {
@@ -285,15 +360,16 @@ main {
   width: 100%;
   padding: 0.5rem 0.75rem;
   font-size: 0.8rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid var(--input-border);
   border-radius: 8px;
-  color: #1a1a2e;
-  background: #f8fafc;
+  color: var(--input-text);
+  background: var(--input-bg);
   margin-bottom: 0.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
 .copy-button {
   display: block;
   width: 100%;
@@ -316,6 +392,20 @@ main {
   background: #16a34a;
   color: #fff;
   border-color: #16a34a;
+}
+
+[data-theme="dark"] .copy-button {
+  background: #14532d;
+  color: #86efac;
+}
+
+[data-theme="dark"] .copy-button:hover {
+  background: #166534;
+}
+
+[data-theme="dark"] .copy-button.copied {
+  background: #16a34a;
+  color: #fff;
 }
 
 /* ─── Button press animation ─────────────────────── */
@@ -344,13 +434,22 @@ footer {
   text-align: center;
   padding: 1rem;
   font-size: 0.78rem;
-  color: #a0aec0;
-  background: #fff;
-  border-top: 1px solid #e2e8f0;
+  color: var(--tagline);
+  background: var(--footer-bg);
+  border-top: 1px solid var(--footer-border);
 }
 
 /* ─── Responsive ─────────────────────────────────── */
 @media (max-width: 700px) {
+  header {
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  #dark-mode-btn {
+    margin-left: auto;
+  }
+
   main {
     flex-direction: column;
     padding: 1rem;

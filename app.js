@@ -106,6 +106,38 @@ function generateShareURL() {
   return window.location.origin + window.location.pathname + "?" + params.toString();
 }
 
+// ── Dark mode ─────────────────────────────────────────────────────────────────
+
+function applyTheme(theme) {
+  document.body.setAttribute("data-theme", theme);
+  var btn = document.getElementById("dark-mode-btn");
+  if (theme === "dark") {
+    btn.textContent = "☀️ Light";
+    btn.setAttribute("aria-label", "Switch to light mode");
+  } else {
+    btn.textContent = "🌙 Dark";
+    btn.setAttribute("aria-label", "Switch to dark mode");
+  }
+}
+
+function initTheme() {
+  var stored = localStorage.getItem("theme");
+  if (stored === "dark" || stored === "light") {
+    applyTheme(stored);
+  } else if (window.matchMedia("(prefers-color-scheme: dark)").matches) {
+    applyTheme("dark");
+  } else {
+    applyTheme("light");
+  }
+}
+
+document.getElementById("dark-mode-btn").addEventListener("click", function () {
+  var current = document.body.getAttribute("data-theme");
+  var next = current === "dark" ? "light" : "dark";
+  applyTheme(next);
+  localStorage.setItem("theme", next);
+});
+
 // ── Event listeners ───────────────────────────────────────────────────────────
 
 document.querySelectorAll('input[name="model"], input[name="battery"], input[name="color"]')
@@ -142,5 +174,6 @@ document.getElementById("copy-btn").addEventListener("click", function() {
 
 // ── Initial render ────────────────────────────────────────────────────────────
 
+initTheme();
 loadFromURL();
 updateConfigurator();
