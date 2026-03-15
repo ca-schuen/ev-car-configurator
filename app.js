@@ -26,9 +26,18 @@ const COLOR_LABELS = {
   Red:   "Racing Red",
 };
 
-const SLUG_TO_MODEL   = { urban: "Urban", touring: "Touring", performance: "Performance" };
-const SLUG_TO_BATTERY = { "60": "60", "80": "80", "100": "100" };
-const SLUG_TO_COLOR   = { white: "White", black: "Black", blue: "Blue", red: "Red" };
+function buildSlugMapFromKeys(sourceObject) {
+  var map = {};
+  Object.keys(sourceObject).forEach(function (key) {
+    var slug = String(key).toLowerCase();
+    map[slug] = key;
+  });
+  return map;
+}
+
+const SLUG_TO_MODEL   = buildSlugMapFromKeys(MODEL_PRICES);
+const SLUG_TO_BATTERY = buildSlugMapFromKeys(BATTERY_SURCHARGES);
+const SLUG_TO_COLOR   = buildSlugMapFromKeys(COLOR_SURCHARGES);
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
