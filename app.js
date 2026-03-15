@@ -106,6 +106,32 @@ function generateShareURL() {
   return window.location.origin + window.location.pathname + "?" + params.toString();
 }
 
+// ── Dark mode ─────────────────────────────────────────────────────────────────
+
+function applyTheme(isDark) {
+  document.documentElement.setAttribute("data-theme", isDark ? "dark" : "light");
+  var toggle = document.getElementById("dark-mode-toggle");
+  if (toggle) toggle.textContent = isDark ? "☀️" : "🌙";
+}
+
+function initDarkMode() {
+  var saved = null;
+  try {
+    saved = localStorage.getItem("theme");
+  } catch (e) {}
+
+  applyTheme(saved === "dark");
+
+  document.getElementById("dark-mode-toggle").addEventListener("click", function () {
+    var isDark = document.documentElement.getAttribute("data-theme") === "dark";
+    var newIsDark = !isDark;
+    applyTheme(newIsDark);
+    try {
+      localStorage.setItem("theme", newIsDark ? "dark" : "light");
+    } catch (e) {}
+  });
+}
+
 // ── Event listeners ───────────────────────────────────────────────────────────
 
 document.querySelectorAll('input[name="model"], input[name="battery"], input[name="color"]')
@@ -144,3 +170,4 @@ document.getElementById("copy-btn").addEventListener("click", function() {
 
 loadFromURL();
 updateConfigurator();
+initDarkMode();

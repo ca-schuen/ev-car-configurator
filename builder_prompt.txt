@@ -1,43 +1,52 @@
 You are the Builder agent for this repository.
 
 Repository: ca-schuen/ev-car-configurator
-Issue number: #17
+Issue number: #35
 
 Issue title:
-Add animation when clicking buttons
+add option to enable/disable dark mode
 
 Issue body:
-Add animation when clicking buttons. Animation can you decide
+add option to enable/disable dark mode
 
 Planner output:
 ## Planner output
 
 ### 1. Summary
-Add a brief "press" (scale-down) animation to all clickable buttons when clicked, giving tactile visual feedback with no JS required.
+Add a toggle button to switch between light and dark mode. Preference is saved to `localStorage` and restored on page load.
 
 ### 2. Scope
-CSS-only change. A `@keyframes` ripple or scale animation triggered via the `:active` pseudo-class on button elements. No new HTML, no JavaScript changes.
+- CSS-only theming via a `data-theme="dark"` attribute on `<body>`
+- A toggle button in the header
+- Persistence via `localStorage`
+- No frameworks, no build step
 
 ### 3. Affected files
 | File | Change |
 |------|--------|
-| `style.css` | Add `@keyframes` + `:active` rules for `.cta-button`, `.share-button`, `.copy-button` |
+| `style.css` | Add `[data-theme="dark"]` CSS custom-property overrides |
+| `index.html` | Add dark-mode toggle button to `<header>` |
+| `app.js` | Add `initDarkMode()` and toggle logic (read/write `localStorage`) |
+| `README.md` | Document the dark mode feature briefly |
 
 ### 4. Implementation steps
-1. Define a single `@keyframes btn-press` animation that briefly scales the button down to ~0.95 and back.
-2. Add an `:active` selector for all three button classes (`.cta-button`, `.share-button`, `.copy-button`) that applies the animation with a short duration (~120ms).
-3. Ensure `transition` on existing hover rules doesn't conflict (`:active` takes precedence in the cascade).
+1. **CSS** – Define light-mode values as CSS custom properties on `:root` (background, surface, text, border colours). Add a `[data-theme="dark"]` block that overrides them with dark equivalents.
+2. **HTML** – Add a `<button id="dark-mode-toggle">` (e.g. `🌙 / ☀️`) in the `<header>`, right-aligned.
+3. **JS** – Write `initDarkMode()`: read `localStorage.getItem("theme")`, apply `data-theme` to `<body>`, and update button label. Wire a `click` listener on the toggle to flip the attribute and persist the new value. Call `initDarkMode()` on page load (before first render to avoid flash).
+4. **README** – Add a one-liner describing the toggle and persistence behaviour.
 
 ### 5. Test / validation ideas
-- Click each button and visually verify the scale-down animation fires.
-- Check on mobile (touch): `:active` should also trigger on tap.
-- Verify the "Order now" `alert`, share panel toggle, and copy logic still work correctly after the click.
-- Confirm no layout shift (use `transform: scale` not `width`/`padding` changes).
+- Manually toggle dark mode; verify all surfaces (header, cards, summary panel, footer) change correctly.
+- Reload the page; confirm the chosen theme is restored from `localStorage`.
+- Test at mobile breakpoint (≤700 px) to ensure the toggle is visible and usable.
+- Check color-swatch borders and the `.total-price` dark block are still legible in dark mode.
+- Verify the `prefers-color-scheme: dark` media query is **not** required (manual toggle is the explicit feature), but consider it as an optional default hint.
 
 ### 6. Risks / edge cases
-- **`transition` vs `animation` conflict**: existing `transition: background 0.15s` rules are fine; `transform` is a separate property and won't interfere.
-- **Reduced-motion users**: wrap the `@keyframes` in a `@media (prefers-reduced-motion: no-preference)` block to respect accessibility preferences.
-- **Copy button `.copied` state**: the animation should not re-trigger while the button shows "✓ Copied!" — but since `:active` only fires on the press moment, this is not an issue.
+- **Flash of wrong theme** – apply `data-theme` synchronously early in JS (or via a `<script>` inline in `<head>`) to avoid a light→dark flicker on load.
+- **Hardcoded colors** – `style.css` currently has many hardcoded hex values; they all need to be converted to custom properties, which is the bulk of the work.
+- **Color swatches** – white swatch (`#f8fafc`) will be nearly invisible in dark mode; may need a slightly different border or background treatment.
+- **`localStorage` unavailable** – gracefully fall back to light mode if storage access throws (e.g. private browsing restrictions).
 
 
 
@@ -56,6 +65,7 @@ A tiny fictional electric-vehicle configurator built as a static demo — no bui
 | `style.css` | All styling — responsive layout, card components, color swatches, and the summary panel |
 | `app.js` | Pricing logic and live DOM updates |
 | `README.md` | This file |
+| `tests/static-check.sh` | Dependency-free shell script that validates required files and expected code patterns |
 
 ## How the pricing logic works
 
@@ -82,6 +92,14 @@ Click **Copy link** to copy the URL to the clipboard, then share it with anyone.
 ## Running locally
 
 Open `index.html` in any modern browser. No server or build step is needed.
+
+## Running the static checks
+
+```
+bash tests/static-check.sh
+```
+
+The script requires no dependencies and exits non-zero if any check fails.
 
 ## CI checks
 
@@ -135,7 +153,6 @@ Human reviews and merges
 ---
 
 *Voltara is a fictional brand. No real vehicles are sold.*
-
 --- index.html ---
 <!DOCTYPE html>
 <html lang="en">
@@ -729,6 +746,27 @@ main {
   border-color: #16a34a;
 }
 
+/* ─── Button press animation ─────────────────────── */
+@keyframes btn-press {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.cta-button:active,
+.share-button:active,
+.copy-button:active {
+  animation: btn-press 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-button:active,
+  .share-button:active,
+  .copy-button:active {
+    animation: none;
+  }
+}
+
 /* ─── Footer ─────────────────────────────────────── */
 footer {
   text-align: center;
@@ -762,7 +800,6 @@ footer {
     flex: 1 1 calc(33% - 0.5rem);
   }
 }
-
 Task:
 Implement the issue by rewriting only the files that actually need to change.
 
