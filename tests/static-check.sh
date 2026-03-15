@@ -83,11 +83,17 @@ echo "=== Dark mode toggle (index.html) ==="
 check "dark-mode-toggle button exists in markup" \
   "$(contains index.html 'dark-mode-toggle')"
 
+check "dark-mode-toggle has aria-label for accessibility" \
+  "$(contains index.html 'aria-label')"
+
 check "early theme script present to avoid flash" \
   "$(contains index.html 'localStorage.getItem(\"theme\")')"
 
 check "data-theme attribute set by early script" \
   "$(contains index.html 'data-theme')"
+
+check "moon emoji used as default toggle icon" \
+  "$(contains index.html '🌙')"
 
 echo ""
 echo "=== Dark mode CSS (style.css) ==="
@@ -114,11 +120,20 @@ check "applyTheme function defined" \
 check "initDarkMode function defined" \
   "$(contains app.js 'function initDarkMode')"
 
+check "applyTheme sets moon icon for light mode" \
+  "$(contains app.js '🌙')"
+
+check "applyTheme sets sun icon for dark mode" \
+  "$(contains app.js '☀️')"
+
 check "localStorage used to persist theme" \
   "$(contains app.js 'localStorage.setItem')"
 
 check "localStorage read to restore theme" \
   "$(contains app.js 'localStorage.getItem')"
+
+check "localStorage access wrapped in try/catch for graceful fallback" \
+  "$(contains_re app.js 'try\s*\{[^}]*localStorage')"
 
 check "data-theme attribute toggled in JS" \
   "$(contains app.js 'data-theme')"
@@ -130,6 +145,9 @@ echo ""
 echo "=== Dark mode documented (README.md) ==="
 check "dark mode section present in README" \
   "$(contains README.md 'Dark mode')"
+
+check "README documents localStorage persistence" \
+  "$(contains README.md 'localStorage')"
 
 echo ""
 echo "=== Summary ==="
