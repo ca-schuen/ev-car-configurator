@@ -72,7 +72,7 @@ jobs:
           git switch -c "$BRANCH"
           echo "branch=$BRANCH" >> "$GITHUB_OUTPUT"
 
-            - name: Build builder prompt
+      - name: Build builder prompt
         run: |
           cat > builder_prompt.txt <<'EOF'
           You are the Builder agent for this repository.
@@ -248,7 +248,7 @@ jobs:
                 '',
                 `Draft PR created: ${prUrl}`,
                 '',
-                'The builder workflow generated a patch, applied it, committed it, and opened a draft PR.'
+                'The builder workflow generated file updates, committed them, and opened a draft PR.'
               ].join('\n')
             });
 
