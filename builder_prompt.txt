@@ -1,43 +1,73 @@
 You are the Builder agent for this repository.
 
 Repository: ca-schuen/ev-car-configurator
-Issue number: #17
+Issue number: #28
 
 Issue title:
-Add animation when clicking buttons
+make some things more opaque in the UI
 
 Issue body:
-Add animation when clicking buttons. Animation can you decide
+it should look and feel like the apple liquid glass design
 
 Planner output:
 ## Planner output
 
 ### 1. Summary
-Add a brief "press" (scale-down) animation to all clickable buttons when clicked, giving tactile visual feedback with no JS required.
+Restyle the UI to evoke Apple's "liquid glass" aesthetic: translucent frosted-glass surfaces, soft blur backdrops, subtle gradients, and refined opacity — all purely through CSS on the existing static files.
+
+---
 
 ### 2. Scope
-CSS-only change. A `@keyframes` ripple or scale animation triggered via the `:active` pseudo-class on button elements. No new HTML, no JavaScript changes.
+CSS-only visual restyle. No layout changes, no new HTML structure, no JS changes. The existing component hierarchy (cards, summary panel, header, footer) maps cleanly onto the glass treatment.
+
+---
 
 ### 3. Affected files
 | File | Change |
 |------|--------|
-| `style.css` | Add `@keyframes` + `:active` rules for `.cta-button`, `.share-button`, `.copy-button` |
+| `style.css` | Primary — add backdrop-filter blur, rgba backgrounds, refined borders, gradients |
+| `index.html` | Minor — possibly add a `<meta name="theme-color">` or a decorative gradient layer via a `<div>` in `<body>` if needed for the background canvas |
+
+---
 
 ### 4. Implementation steps
-1. Define a single `@keyframes btn-press` animation that briefly scales the button down to ~0.95 and back.
-2. Add an `:active` selector for all three button classes (`.cta-button`, `.share-button`, `.copy-button`) that applies the animation with a short duration (~120ms).
-3. Ensure `transition` on existing hover rules doesn't conflict (`:active` takes precedence in the cascade).
+
+1. **Background canvas** — Replace flat `#f4f6f9` body background with a rich gradient or mesh (e.g. soft indigo/violet/cyan tones) that gives glass elements something colourful to blur against.
+
+2. **Glass card surface** — Apply to `.radio-card`, `.color-card`, `.summary-panel`:
+   - `background: rgba(255, 255, 255, 0.18)` (or similar low-opacity white)
+   - `backdrop-filter: blur(16px) saturate(180%)`
+   - `-webkit-backdrop-filter: …` for Safari
+   - Replace solid `border: 2px solid #e2e8f0` with `border: 1px solid rgba(255,255,255,0.35)`
+   - Soften `box-shadow` to a multi-layer glow
+
+3. **Header / footer** — Apply same glass treatment: `background: rgba(10,10,30,0.55)` + blur instead of solid dark fill.
+
+4. **Summary panel total bar** — Replace solid `#1a1a2e` block with a dark glass variant (`rgba(10,10,30,0.7)` + blur).
+
+5. **Buttons** — Give `.cta-button` a tinted glass look (semi-transparent blue fill + blur); `.share-button` / `.copy-button` follow the same pattern with their respective accent colours.
+
+6. **Selected-card highlight** — Update `:has(input:checked)` styles to use a luminous tinted border + inner glow instead of a flat blue ring.
+
+7. **Typography contrast check** — Ensure text legibility on translucent surfaces; bump font-weight or add a subtle `text-shadow` where needed.
+
+---
 
 ### 5. Test / validation ideas
-- Click each button and visually verify the scale-down animation fires.
-- Check on mobile (touch): `:active` should also trigger on tap.
-- Verify the "Order now" `alert`, share panel toggle, and copy logic still work correctly after the click.
-- Confirm no layout shift (use `transform: scale` not `width`/`padding` changes).
+- Open `index.html` locally in Chrome and Safari (webkit prefix matters for `backdrop-filter`).
+- Run `bash tests/static-check.sh` — should still pass (file presence / code pattern checks are unchanged).
+- Check all four colour swatches and all selection states remain clearly visible.
+- Verify the share section, copy button states, and "copied" flash still read well on glass.
+- Resize to ≤700 px to confirm responsive layout is unaffected.
+- Test with `prefers-reduced-motion` and `prefers-color-scheme: dark` if a dark mode fallback is desired (optional).
+
+---
 
 ### 6. Risks / edge cases
-- **`transition` vs `animation` conflict**: existing `transition: background 0.15s` rules are fine; `transform` is a separate property and won't interfere.
-- **Reduced-motion users**: wrap the `@keyframes` in a `@media (prefers-reduced-motion: no-preference)` block to respect accessibility preferences.
-- **Copy button `.copied` state**: the animation should not re-trigger while the button shows "✓ Copied!" — but since `:active` only fires on the press moment, this is not an issue.
+- **`backdrop-filter` browser support** — Not supported in older Firefox (pre-103) or some Android WebViews. Provide a graceful fallback (slightly more opaque background) for those cases using `@supports`.
+- **Contrast / accessibility** — Frosted glass on a gradient can reduce text contrast below WCAG AA. Check after implementation.
+- **Background dependency** — Glass looks flat/grey without a colourful background; the gradient canvas in step 1 is load-bearing for the whole effect.
+- **Print/screenshot** — Translucent surfaces may render oddly in print stylesheets (low priority for a demo).
 
 
 
@@ -56,6 +86,7 @@ A tiny fictional electric-vehicle configurator built as a static demo — no bui
 | `style.css` | All styling — responsive layout, card components, color swatches, and the summary panel |
 | `app.js` | Pricing logic and live DOM updates |
 | `README.md` | This file |
+| `tests/static-check.sh` | Dependency-free shell script that validates required files and expected code patterns |
 
 ## How the pricing logic works
 
@@ -82,6 +113,14 @@ Click **Copy link** to copy the URL to the clipboard, then share it with anyone.
 ## Running locally
 
 Open `index.html` in any modern browser. No server or build step is needed.
+
+## Running the static checks
+
+```
+bash tests/static-check.sh
+```
+
+The script requires no dependencies and exits non-zero if any check fails.
 
 ## CI checks
 
@@ -135,7 +174,6 @@ Human reviews and merges
 ---
 
 *Voltara is a fictional brand. No real vehicles are sold.*
-
 --- index.html ---
 <!DOCTYPE html>
 <html lang="en">
@@ -729,6 +767,27 @@ main {
   border-color: #16a34a;
 }
 
+/* ─── Button press animation ─────────────────────── */
+@keyframes btn-press {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.cta-button:active,
+.share-button:active,
+.copy-button:active {
+  animation: btn-press 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-button:active,
+  .share-button:active,
+  .copy-button:active {
+    animation: none;
+  }
+}
+
 /* ─── Footer ─────────────────────────────────────── */
 footer {
   text-align: center;
@@ -762,7 +821,6 @@ footer {
     flex: 1 1 calc(33% - 0.5rem);
   }
 }
-
 Task:
 Implement the issue by rewriting only the files that actually need to change.
 
