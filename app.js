@@ -106,6 +106,18 @@ function generateShareURL() {
   return window.location.origin + window.location.pathname + "?" + params.toString();
 }
 
+function resetConfiguration() {
+  var modelInput = document.querySelector('input[name="model"][value="Urban"]');
+  var batteryInput = document.querySelector('input[name="battery"][value="60"]');
+  var colorInput = document.querySelector('input[name="color"][value="White"]');
+
+  if (modelInput) modelInput.checked = true;
+  if (batteryInput) batteryInput.checked = true;
+  if (colorInput) colorInput.checked = true;
+
+  updateConfigurator();
+}
+
 // ── Event listeners ───────────────────────────────────────────────────────────
 
 document.querySelectorAll('input[name="model"], input[name="battery"], input[name="color"]')
@@ -139,6 +151,8 @@ document.getElementById("copy-btn").addEventListener("click", function() {
     setTimeout(function() { copyBtn.title = ""; }, 3000);
   });
 });
+
+document.getElementById("reset-btn").addEventListener("click", resetConfiguration);
 
 // ── Initial render ────────────────────────────────────────────────────────────
 
