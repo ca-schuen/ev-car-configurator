@@ -5,15 +5,43 @@ on:
   push:
     branches: [main]
 
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
-  validate-static-site:
+  static-gate:
     runs-on: ubuntu-latest
+    timeout-minutes: 5
+
     steps:
       - uses: actions/checkout@v4
 
       - name: Check required files exist
         run: |
-          test -f index.html
-          test -f style.css
-          test -f app.js
-          test -f README.md
+          set -euo pipefail
+          for f in index.html style.css app.js README.md tests/static-check.sh; do
+            test -f "$f"
+          done
+
+      - name: Check shell script syntax
+        run: |
+          set -euo pipefail
+          bash -n tests/static-check.sh
+
+      - name: Check for merge conflict markers
+        run: |
+          set -euo pipefail
+          if git grep -nE '^(<<<<<<<|=======|>>>>>>>)' -- .; then
+            echo "Merge conflict markers found"
+            exit 1
+          fi
+
+      - name: Run static checks
+        run: |
+          set -euo pipefail
+          chmod +x tests/static-check.sh
+          ./tests/static-check.sh
