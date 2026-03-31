@@ -79,6 +79,54 @@ check ".copy-button exists in markup" \
   "$(contains index.html 'copy-button')"
 
 echo ""
+echo "=== Dark mode toggle (index.html) ==="
+check "dark-toggle button exists in markup" \
+  "$(contains index.html 'dark-toggle')"
+
+check "dark mode early-init script present in <head>" \
+  "$(contains index.html 'localStorage.getItem')"
+
+check "dark mode class applied to <html> element" \
+  "$(contains index.html "document.documentElement.classList.add('dark')")"
+
+echo ""
+echo "=== Dark mode styles (style.css) ==="
+check "html.dark body rule defined" \
+  "$(contains style.css 'html.dark body')"
+
+check "html.dark header rule defined" \
+  "$(contains style.css 'html.dark header')"
+
+check "html.dark .summary-panel rule defined" \
+  "$(contains style.css 'html.dark .summary-panel')"
+
+check "dark-toggle button styled" \
+  "$(contains style.css '.dark-toggle')"
+
+echo ""
+echo "=== Dark mode logic (app.js) ==="
+check "initDarkMode function defined" \
+  "$(contains app.js 'initDarkMode')"
+
+check "dark-toggle element retrieved by id" \
+  "$(contains app.js 'dark-toggle')"
+
+check "classList.toggle used to switch dark class" \
+  "$(contains app.js "classList.toggle")"
+
+check "localStorage used to persist dark mode preference" \
+  "$(contains app.js "localStorage.setItem")"
+
+check "sun emoji shown in dark mode" \
+  "$(contains app.js '☀️')"
+
+check "moon emoji shown in light mode" \
+  "$(contains app.js '🌙')"
+
+check "initDarkMode called on page load" \
+  "$(contains_re app.js 'initDarkMode\(\)')"
+
+echo ""
 echo "=== Summary ==="
 echo "  Passed: $PASS"
 echo "  Failed: $FAIL"
