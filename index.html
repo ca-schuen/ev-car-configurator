@@ -5,11 +5,19 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Voltara EV Configurator</title>
   <link rel="stylesheet" href="style.css" />
+  <script>
+    (function() {
+      if (localStorage.getItem('darkMode') === 'on') {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
 </head>
 <body>
   <header>
     <div class="brand">⚡ Voltara</div>
     <div class="tagline">Configure your electric future</div>
+    <button class="dark-toggle" id="dark-toggle" aria-label="Toggle dark mode">🌙</button>
   </header>
 
   <main>

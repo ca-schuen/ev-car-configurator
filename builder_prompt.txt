@@ -1,43 +1,61 @@
 You are the Builder agent for this repository.
 
 Repository: ca-schuen/ev-car-configurator
-Issue number: #17
+Issue number: #42
 
 Issue title:
-Add animation when clicking buttons
+Toggle Dark Mode Button
 
 Issue body:
-Add animation when clicking buttons. Animation can you decide
+Add a Toggle Dark Mode Button
 
 Planner output:
 ## Planner output
 
 ### 1. Summary
-Add a brief "press" (scale-down) animation to all clickable buttons when clicked, giving tactile visual feedback with no JS required.
+Add a toggle button to switch between light and dark mode. The preference should persist across page reloads using `localStorage`.
+
+---
 
 ### 2. Scope
-CSS-only change. A `@keyframes` ripple or scale animation triggered via the `:active` pseudo-class on button elements. No new HTML, no JavaScript changes.
+UI-only change. No pricing logic, no backend, no new dependencies. Stays fully static.
+
+---
 
 ### 3. Affected files
 | File | Change |
 |------|--------|
-| `style.css` | Add `@keyframes` + `:active` rules for `.cta-button`, `.share-button`, `.copy-button` |
+| `index.html` | Add dark mode toggle button (e.g. in the header) |
+| `style.css` | Add `body.dark` CSS overrides for all colour tokens |
+| `app.js` | Add toggle logic + `localStorage` persistence |
+| `README.md` | Document the dark mode toggle feature |
+
+---
 
 ### 4. Implementation steps
-1. Define a single `@keyframes btn-press` animation that briefly scales the button down to ~0.95 and back.
-2. Add an `:active` selector for all three button classes (`.cta-button`, `.share-button`, `.copy-button`) that applies the animation with a short duration (~120ms).
-3. Ensure `transition` on existing hover rules doesn't conflict (`:active` takes precedence in the cascade).
+1. **`style.css`** — Add a `body.dark` block that overrides background, text, card, panel, header, and footer colours. Also style a `.dark-toggle` button.
+2. **`index.html`** — Add a `<button class="dark-toggle">` inside `<header>`, e.g. with a 🌙/☀️ label.
+3. **`app.js`** — Add an `initDarkMode()` function that:
+   - Reads `localStorage.getItem('darkMode')` on load and applies `body.dark` if set.
+   - Attaches a click listener to the toggle button that flips the class and saves the preference.
+4. **`README.md`** — Add a short note about the dark mode toggle under the feature list.
+
+---
 
 ### 5. Test / validation ideas
-- Click each button and visually verify the scale-down animation fires.
-- Check on mobile (touch): `:active` should also trigger on tap.
-- Verify the "Order now" `alert`, share panel toggle, and copy logic still work correctly after the click.
-- Confirm no layout shift (use `transform: scale` not `width`/`padding` changes).
+- Click toggle: page switches colour scheme immediately.
+- Reload page: previously chosen mode is restored.
+- Default (no saved preference): light mode renders correctly.
+- Mobile (`≤700px`): button is visible and usable in the header.
+- Share URL still works in both modes.
+
+---
 
 ### 6. Risks / edge cases
-- **`transition` vs `animation` conflict**: existing `transition: background 0.15s` rules are fine; `transform` is a separate property and won't interfere.
-- **Reduced-motion users**: wrap the `@keyframes` in a `@media (prefers-reduced-motion: no-preference)` block to respect accessibility preferences.
-- **Copy button `.copied` state**: the animation should not re-trigger while the button shows "✓ Copied!" — but since `:active` only fires on the press moment, this is not an issue.
+- **Colour contrast**: dark overrides must meet readable contrast ratios, especially for `.card-price`, `.summary-key`, and the footer text.
+- **White colour swatch**: the Alpine White swatch (`background: #f8fafc`) needs a visible border in dark mode so it doesn't disappear.
+- **`prefers-color-scheme`**: the issue doesn't mention system preference matching — skip for simplicity; only the explicit toggle is required.
+- **Flash of wrong theme**: applying the class early in `<head>` or at the top of `app.js` (before paint) avoids a light-flash on reload — worth a brief inline script in `<head>` rather than waiting for `DOMContentLoaded`.
 
 
 
@@ -56,6 +74,7 @@ A tiny fictional electric-vehicle configurator built as a static demo — no bui
 | `style.css` | All styling — responsive layout, card components, color swatches, and the summary panel |
 | `app.js` | Pricing logic and live DOM updates |
 | `README.md` | This file |
+| `tests/static-check.sh` | Dependency-free shell script that validates required files and expected code patterns |
 
 ## How the pricing logic works
 
@@ -82,6 +101,14 @@ Click **Copy link** to copy the URL to the clipboard, then share it with anyone.
 ## Running locally
 
 Open `index.html` in any modern browser. No server or build step is needed.
+
+## Running the static checks
+
+```
+bash tests/static-check.sh
+```
+
+The script requires no dependencies and exits non-zero if any check fails.
 
 ## CI checks
 
@@ -135,7 +162,6 @@ Human reviews and merges
 ---
 
 *Voltara is a fictional brand. No real vehicles are sold.*
-
 --- index.html ---
 <!DOCTYPE html>
 <html lang="en">
@@ -729,6 +755,27 @@ main {
   border-color: #16a34a;
 }
 
+/* ─── Button press animation ─────────────────────── */
+@keyframes btn-press {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
+
+.cta-button:active,
+.share-button:active,
+.copy-button:active {
+  animation: btn-press 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cta-button:active,
+  .share-button:active,
+  .copy-button:active {
+    animation: none;
+  }
+}
+
 /* ─── Footer ─────────────────────────────────────── */
 footer {
   text-align: center;
@@ -762,7 +809,6 @@ footer {
     flex: 1 1 calc(33% - 0.5rem);
   }
 }
-
 Task:
 Implement the issue by rewriting only the files that actually need to change.
 

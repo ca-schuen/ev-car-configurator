@@ -1,3 +1,301 @@
+===FILE:index.html===
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Voltara EV Configurator</title>
+  <link rel="stylesheet" href="style.css" />
+  <script>
+    (function() {
+      if (localStorage.getItem('darkMode') === 'on') {
+        document.documentElement.classList.add('dark');
+      }
+    })();
+  </script>
+</head>
+<body>
+  <header>
+    <div class="brand">⚡ Voltara</div>
+    <div class="tagline">Configure your electric future</div>
+    <button class="dark-toggle" id="dark-toggle" aria-label="Toggle dark mode">🌙</button>
+  </header>
+
+  <main>
+    <section class="config-panel">
+      <h2>Build your Voltara Nova</h2>
+
+      <div class="option-group">
+        <label for="model">Model</label>
+        <div class="radio-group" id="model">
+          <label class="radio-card">
+            <input type="radio" name="model" value="Urban" checked />
+            <span class="card-label">Urban</span>
+            <span class="card-price">from €34,900</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="model" value="Touring" />
+            <span class="card-label">Touring</span>
+            <span class="card-price">from €42,900</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="model" value="Performance" />
+            <span class="card-label">Performance</span>
+            <span class="card-price">from €54,900</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <label for="battery">Battery</label>
+        <div class="radio-group" id="battery">
+          <label class="radio-card">
+            <input type="radio" name="battery" value="60" checked />
+            <span class="card-label">60 kWh</span>
+            <span class="card-price">Standard</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="battery" value="80" />
+            <span class="card-label">80 kWh</span>
+            <span class="card-price">+€5,000</span>
+          </label>
+          <label class="radio-card">
+            <input type="radio" name="battery" value="100" />
+            <span class="card-label">100 kWh</span>
+            <span class="card-price">+€11,000</span>
+          </label>
+        </div>
+      </div>
+
+      <div class="option-group">
+        <label>Color</label>
+        <div class="color-group" id="color">
+          <label class="color-card" title="Alpine White">
+            <input type="radio" name="color" value="White" checked />
+            <span class="color-swatch white"></span>
+            <span class="color-name">Alpine White</span>
+            <span class="card-price">Standard</span>
+          </label>
+          <label class="color-card" title="Midnight Black">
+            <input type="radio" name="color" value="Black" />
+            <span class="color-swatch black"></span>
+            <span class="color-name">Midnight Black</span>
+            <span class="card-price">+€700</span>
+          </label>
+          <label class="color-card" title="Ocean Blue">
+            <input type="radio" name="color" value="Blue" />
+            <span class="color-swatch blue"></span>
+            <span class="color-name">Ocean Blue</span>
+            <span class="card-price">+€900</span>
+          </label>
+          <label class="color-card" title="Racing Red">
+            <input type="radio" name="color" value="Red" />
+            <span class="color-swatch red"></span>
+            <span class="color-name">Racing Red</span>
+            <span class="card-price">+€1,200</span>
+          </label>
+        </div>
+      </div>
+    </section>
+
+    <aside class="summary-panel">
+      <h2>Your Configuration</h2>
+      <ul class="summary-list" id="summary-list">
+        <li><span class="summary-key">Model</span><span class="summary-val" id="sum-model">Urban</span></li>
+        <li><span class="summary-key">Battery</span><span class="summary-val" id="sum-battery">60 kWh</span></li>
+        <li><span class="summary-key">Color</span><span class="summary-val" id="sum-color">Alpine White</span></li>
+        <li class="summary-divider"></li>
+        <li><span class="summary-key">Base price</span><span class="summary-val" id="sum-base">€34,900</span></li>
+        <li><span class="summary-key">Battery option</span><span class="summary-val" id="sum-battery-price">Included</span></li>
+        <li><span class="summary-key">Color option</span><span class="summary-val" id="sum-color-price">Included</span></li>
+      </ul>
+      <div class="total-price">
+        <span>Total</span>
+        <span id="total-price">€34,900</span>
+      </div>
+      <button class="cta-button" onclick="alert('Order placed! 🎉')">Order now</button>
+      <button class="share-button" id="share-btn">Share configuration</button>
+      <div class="share-section" id="share-section" style="display:none;">
+        <input class="share-url-input" id="share-url" type="text" readonly />
+        <button class="copy-button" id="copy-btn">Copy link</button>
+      </div>
+    </aside>
+  </main>
+
+  <footer>
+    <p>Voltara is a fictional brand · Static demo only · No real vehicles sold</p>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>
+===ENDFILE===
+
+===FILE:app.js===
+// ── Pricing tables ────────────────────────────────────────────────────────────
+
+const MODEL_PRICES = {
+  Urban:       34900,
+  Touring:     42900,
+  Performance: 54900,
+};
+
+const BATTERY_SURCHARGES = {
+  "60": 0,
+  "80": 5000,
+  "100": 11000,
+};
+
+const COLOR_SURCHARGES = {
+  White: 0,
+  Black: 700,
+  Blue:  900,
+  Red:   1200,
+};
+
+const COLOR_LABELS = {
+  White: "Alpine White",
+  Black: "Midnight Black",
+  Blue:  "Ocean Blue",
+  Red:   "Racing Red",
+};
+
+function buildSlugMapFromKeys(sourceObject) {
+  var map = {};
+  Object.keys(sourceObject).forEach(function (key) {
+    var slug = String(key).toLowerCase();
+    map[slug] = key;
+  });
+  return map;
+}
+
+const SLUG_TO_MODEL   = buildSlugMapFromKeys(MODEL_PRICES);
+const SLUG_TO_BATTERY = buildSlugMapFromKeys(BATTERY_SURCHARGES);
+const SLUG_TO_COLOR   = buildSlugMapFromKeys(COLOR_SURCHARGES);
+
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
+function formatEUR(amount) {
+  return "€" + amount.toLocaleString("en-US");
+}
+
+function formatSurcharge(amount) {
+  return amount === 0 ? "Included" : "+" + formatEUR(amount);
+}
+
+// ── Core update function ──────────────────────────────────────────────────────
+
+function updateConfigurator() {
+  const model   = document.querySelector('input[name="model"]:checked').value;
+  const battery = document.querySelector('input[name="battery"]:checked').value;
+  const color   = document.querySelector('input[name="color"]:checked').value;
+
+  const basePrice     = MODEL_PRICES[model];
+  const batterySurch  = BATTERY_SURCHARGES[battery];
+  const colorSurch    = COLOR_SURCHARGES[color];
+  const total         = basePrice + batterySurch + colorSurch;
+
+  // Update summary values
+  document.getElementById("sum-model").textContent        = model;
+  document.getElementById("sum-battery").textContent      = battery + " kWh";
+  document.getElementById("sum-color").textContent        = COLOR_LABELS[color];
+  document.getElementById("sum-base").textContent         = formatEUR(basePrice);
+  document.getElementById("sum-battery-price").textContent = formatSurcharge(batterySurch);
+  document.getElementById("sum-color-price").textContent  = formatSurcharge(colorSurch);
+
+  // Update total
+  document.getElementById("total-price").textContent = formatEUR(total);
+}
+
+// ── Share configuration ───────────────────────────────────────────────────────
+
+function getValidSlug(raw, slugMap, fallback) {
+  if (raw === null) return fallback;
+  var resolved = slugMap[raw.toLowerCase()];
+  return resolved !== undefined ? resolved : fallback;
+}
+
+function loadFromURL() {
+  const params = new URLSearchParams(window.location.search);
+
+  const model   = getValidSlug(params.get("model"),   SLUG_TO_MODEL,   "Urban");
+  const battery = getValidSlug(params.get("battery"), SLUG_TO_BATTERY, "60");
+  const color   = getValidSlug(params.get("color"),   SLUG_TO_COLOR,   "White");
+
+  const modelInput   = document.querySelector('input[name="model"][value="'   + model   + '"]');
+  const batteryInput = document.querySelector('input[name="battery"][value="' + battery + '"]');
+  const colorInput   = document.querySelector('input[name="color"][value="'   + color   + '"]');
+
+  if (modelInput)   modelInput.checked   = true;
+  if (batteryInput) batteryInput.checked = true;
+  if (colorInput)   colorInput.checked   = true;
+}
+
+function generateShareURL() {
+  const model   = document.querySelector('input[name="model"]:checked').value;
+  const battery = document.querySelector('input[name="battery"]:checked').value;
+  const color   = document.querySelector('input[name="color"]:checked').value;
+
+  const params = new URLSearchParams({ model: model.toLowerCase(), battery: battery, color: color.toLowerCase() });
+  return window.location.origin + window.location.pathname + "?" + params.toString();
+}
+
+// ── Dark mode ─────────────────────────────────────────────────────────────────
+
+function initDarkMode() {
+  var toggleBtn = document.getElementById("dark-toggle");
+  var isDark = document.documentElement.classList.contains("dark");
+
+  toggleBtn.textContent = isDark ? "☀️" : "🌙";
+
+  toggleBtn.addEventListener("click", function() {
+    var darkNow = document.documentElement.classList.toggle("dark");
+    toggleBtn.textContent = darkNow ? "☀️" : "🌙";
+    localStorage.setItem("darkMode", darkNow ? "on" : "off");
+  });
+}
+
+// ── Event listeners ───────────────────────────────────────────────────────────
+
+document.querySelectorAll('input[name="model"], input[name="battery"], input[name="color"]')
+  .forEach(function(input) {
+    input.addEventListener("change", updateConfigurator);
+  });
+
+document.getElementById("share-btn").addEventListener("click", function() {
+  var url = generateShareURL();
+  var urlInput = document.getElementById("share-url");
+  urlInput.value = url;
+  document.getElementById("share-section").style.display = "block";
+  urlInput.focus();
+  urlInput.select();
+});
+
+document.getElementById("copy-btn").addEventListener("click", function() {
+  var urlInput = document.getElementById("share-url");
+  var copyBtn  = document.getElementById("copy-btn");
+  navigator.clipboard.writeText(urlInput.value).then(function() {
+    copyBtn.classList.add("copied");
+    copyBtn.textContent = "✓ Copied!";
+    setTimeout(function() {
+      copyBtn.classList.remove("copied");
+      copyBtn.textContent = "Copy link";
+    }, 2000);
+  }).catch(function() {
+    urlInput.select();
+    copyBtn.textContent = "Copy link";
+    copyBtn.title = "Copy failed — please copy the URL manually";
+    setTimeout(function() { copyBtn.title = ""; }, 3000);
+  });
+});
+
+// ── Initial render ────────────────────────────────────────────────────────────
+
+loadFromURL();
+updateConfigurator();
+initDarkMode();
+===ENDFILE===
+
 ===FILE:style.css===
 /* ─── Reset & base ───────────────────────────────── */
 *, *::before, *::after {
@@ -21,7 +319,7 @@ header {
   color: #fff;
   padding: 1.25rem 2rem;
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: 1rem;
 }
 
@@ -35,6 +333,25 @@ header {
 .tagline {
   font-size: 0.9rem;
   color: #a0aec0;
+  flex: 1;
+}
+
+/* ─── Dark mode toggle button ────────────────────── */
+.dark-toggle {
+  margin-left: auto;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  border-radius: 8px;
+  padding: 0.35rem 0.65rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  transition: border-color 0.15s, background 0.15s;
+  line-height: 1;
+}
+
+.dark-toggle:hover {
+  border-color: rgba(255, 255, 255, 0.6);
+  background: rgba(255, 255, 255, 0.08);
 }
 
 /* ─── Main layout ────────────────────────────────── */
@@ -320,17 +637,23 @@ main {
 }
 
 /* ─── Button press animation ─────────────────────── */
-@media (prefers-reduced-motion: no-preference) {
-  @keyframes btn-press {
-    0%   { transform: scale(1); }
-    40%  { transform: scale(0.95); }
-    100% { transform: scale(1); }
-  }
+@keyframes btn-press {
+  0%   { transform: scale(1); }
+  40%  { transform: scale(0.95); }
+  100% { transform: scale(1); }
+}
 
+.cta-button:active,
+.share-button:active,
+.copy-button:active {
+  animation: btn-press 120ms ease-out;
+}
+
+@media (prefers-reduced-motion: reduce) {
   .cta-button:active,
   .share-button:active,
   .copy-button:active {
-    animation: btn-press 120ms ease-out;
+    animation: none;
   }
 }
 
@@ -367,5 +690,201 @@ footer {
     flex: 1 1 calc(33% - 0.5rem);
   }
 }
+
+/* ─── Dark mode ──────────────────────────────────── */
+html.dark body {
+  background: #0f1117;
+  color: #e2e8f0;
+}
+
+html.dark header {
+  background: #0a0c12;
+  border-bottom: 1px solid #2d3748;
+}
+
+html.dark .config-panel h2,
+html.dark .summary-panel h2 {
+  color: #e2e8f0;
+}
+
+html.dark .option-group > label {
+  color: #a0aec0;
+}
+
+html.dark .radio-card,
+html.dark .color-card {
+  background: #1e2130;
+  border-color: #2d3748;
+  color: #e2e8f0;
+}
+
+html.dark .radio-card:hover,
+html.dark .color-card:hover {
+  border-color: #60a5fa;
+}
+
+html.dark .radio-card:has(input:checked),
+html.dark .color-card:has(input:checked) {
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.25);
+}
+
+html.dark .card-price {
+  color: #a0aec0;
+}
+
+html.dark .color-swatch.white {
+  border-color: rgba(255, 255, 255, 0.5);
+}
+
+html.dark .summary-panel {
+  background: #1e2130;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.4);
+}
+
+html.dark .summary-list li {
+  border-bottom-color: #2d3748;
+}
+
+html.dark .summary-key {
+  color: #a0aec0;
+}
+
+html.dark .summary-val {
+  color: #e2e8f0;
+}
+
+html.dark .summary-divider {
+  border-top-color: #2d3748 !important;
+}
+
+html.dark .share-button {
+  background: #1e2130;
+  color: #60a5fa;
+  border-color: #3b82f6;
+}
+
+html.dark .share-button:hover {
+  background: #1a2744;
+}
+
+html.dark .share-url-input {
+  background: #0f1117;
+  border-color: #2d3748;
+  color: #e2e8f0;
+}
+
+html.dark footer {
+  background: #0a0c12;
+  border-top-color: #2d3748;
+  color: #718096;
+}
+===ENDFILE===
+
+===FILE:README.md===
+# Voltara EV Configurator
+
+A tiny fictional electric-vehicle configurator built as a static demo — no build step, no back-end, no dependencies.
+
+## File structure
+
+| File | Purpose |
+|------|---------|
+| `index.html` | Page markup — header, option cards (model / battery / color), and a live summary sidebar |
+| `style.css` | All styling — responsive layout, card components, color swatches, and the summary panel |
+| `app.js` | Pricing logic and live DOM updates |
+| `README.md` | This file |
+| `tests/static-check.sh` | Dependency-free shell script that validates required files and expected code patterns |
+
+## How the pricing logic works
+
+All prices are defined as plain JavaScript objects at the top of `app.js`:
+
+```
+Base price  (model)   Urban €34,900 · Touring €42,900 · Performance €54,900
+Battery surcharge     60 kWh +€0 · 80 kWh +€5,000 · 100 kWh +€11,000
+Color surcharge       White +€0 · Black +€700 · Blue +€900 · Red +€1,200
+```
+
+Every time the user changes any radio button, `updateConfigurator()` reads the three currently-selected values, looks up each price, sums them, and writes the result directly into the DOM — no page reload required.
+
+## Dark mode
+
+Click the **🌙 / ☀️** button in the top-right corner of the header to toggle between light and dark mode. The preference is saved in `localStorage` and restored automatically on the next page load. No system preference (`prefers-color-scheme`) is followed — only the explicit toggle is used.
+
+## Sharing a configuration
+
+Click the **Share configuration** button in the summary panel. A URL is generated with the current selections as query parameters, for example:
+
+```
+index.html?model=touring&battery=80&color=blue
+```
+
+Click **Copy link** to copy the URL to the clipboard, then share it with anyone. When the page loads with those parameters, `loadFromURL()` reads them and restores the model, battery, and color automatically before the first render. URLs are parsed case-insensitively, so `Touring` and `touring` both work. Any unrecognised or missing value falls back safely to the default (`Urban`, `60`, `White`).
+
+## Running locally
+
+Open `index.html` in any modern browser. No server or build step is needed.
+
+## Running the static checks
+
+```
+bash tests/static-check.sh
+```
+
+The script requires no dependencies and exits non-zero if any check fails.
+
+## CI checks
+
+`.github/workflows/validate.yml` runs on every push to `main` and on every pull request. It checks that the four core files (`index.html`, `style.css`, `app.js`, `README.md`) are all present. The workflow has no dependencies and requires no local setup — it simply fails if any of those files is missing.
+
+## GitHub Pages
+
+Because the app is entirely static (plain HTML / CSS / JS), it can be hosted on GitHub Pages without any additional configuration: just point GitHub Pages at the repository root on the `main` branch.
+
+---
+
+## GitHub Copilot team scaffold
+
+This repository uses **GitHub Copilot** as a small specialized software team.
+
+### Repository custom instructions
+
+The file `.github/copilot-instructions.md` contains repository-wide rules that every Copilot session applies automatically — things like "no frameworks", "no build steps", and "always update README". This keeps all AI-assisted work consistent with the project's constraints.
+
+### Custom agent profiles
+
+Four agent profiles live in `.github/agents/`. Each one focuses Copilot on a specific role:
+
+| Agent file | Role |
+|-----------|------|
+| `frontend-builder.agent.md` | UI work — HTML, CSS, JavaScript, responsiveness, UX polish |
+| `reviewer.agent.md` | Code review — correctness, edge cases, minimal fixes |
+| `ops.agent.md` | Automation — GitHub Actions, deployment, repository configuration |
+| `planner.agent.md` | Planning — breaks work into steps and suggests which agent should handle each part |
+
+### Intended workflow
+
+```
+New issue
+   │
+   ▼
+Coding agent opens a PR
+   │
+   ▼
+reviewer agent reviews the PR (correctness, edge cases)
+   │
+   ▼
+Human reviews and merges
+```
+
+1. A new issue describes a feature or bug.
+2. A coding agent (e.g. **frontend-builder**) implements the change and opens a PR.
+3. The **reviewer** agent inspects the PR and leaves comments or approves.
+4. A human does a final review and merges.
+
+---
+
+*Voltara is a fictional brand. No real vehicles are sold.*
 ===ENDFILE===
 

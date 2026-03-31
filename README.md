@@ -24,6 +24,10 @@ Color surcharge       White +€0 · Black +€700 · Blue +€900 · Red +€1,
 
 Every time the user changes any radio button, `updateConfigurator()` reads the three currently-selected values, looks up each price, sums them, and writes the result directly into the DOM — no page reload required.
 
+## Dark mode
+
+Click the **🌙 / ☀️** button in the top-right corner of the header to toggle between light and dark mode. The preference is saved in `localStorage` and restored automatically on the next page load. No system preference (`prefers-color-scheme`) is followed — only the explicit toggle is used.
+
 ## Sharing a configuration
 
 Click the **Share configuration** button in the summary panel. A URL is generated with the current selections as query parameters, for example:
