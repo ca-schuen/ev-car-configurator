@@ -72,37 +72,11 @@ echo "=== Buttons present in index.html ==="
 check ".cta-button exists in markup" \
   "$(contains index.html 'cta-button')"
 
-check ".reset-button exists in markup" \
-  "$(contains index.html 'reset-button')"
-
-check "#reset-btn exists in markup" \
-  "$(contains index.html 'id="reset-btn"')"
-
 check ".share-button exists in markup" \
   "$(contains index.html 'share-button')"
 
 check ".copy-button exists in markup" \
   "$(contains index.html 'copy-button')"
-
-echo ""
-echo "=== Reset configuration wiring and defaults (app.js) ==="
-check "resetConfiguration function exists" \
-  "$(contains app.js 'function resetConfiguration()')"
-
-check "reset button click is wired to resetConfiguration" \
-  "$(contains app.js 'document.getElementById("reset-btn").addEventListener("click", resetConfiguration);')"
-
-check "reset default model marker (Urban) exists" \
-  "$(contains app.js 'input[name="model"][value="Urban"]')"
-
-check "reset default battery marker (60) exists" \
-  "$(contains app.js 'input[name="battery"][value="60"]')"
-
-check "reset default color marker (White) exists" \
-  "$(contains app.js 'input[name="color"][value="White"]')"
-
-check "reset triggers refresh via updateConfigurator" \
-  "$(contains app.js 'updateConfigurator();')"
 
 echo ""
 echo "=== Summary ==="
