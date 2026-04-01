@@ -13,17 +13,17 @@ const BATTERY_SURCHARGES = {
 };
 
 const COLOR_SURCHARGES = {
-  White: 0,
-  Black: 700,
-  Blue:  900,
-  Red:   1200,
+  White:  0,
+  Black:  700,
+  Orange: 900,
+  Red:    1200,
 };
 
 const COLOR_LABELS = {
-  White: "Alpine White",
-  Black: "Midnight Black",
-  Blue:  "Ocean Blue",
-  Red:   "Racing Red",
+  White:  "Alpine White",
+  Black:  "Midnight Black",
+  Orange: "Sunset Orange",
+  Red:    "Racing Red",
 };
 
 function buildSlugMapFromKeys(sourceObject) {

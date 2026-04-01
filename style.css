@@ -7,8 +7,8 @@
 
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: #f4f6f9;
-  color: #1a1a2e;
+  background: #f7f2eb;
+  color: #1c1410;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -16,7 +16,7 @@ body {
 
 /* ─── Header ─────────────────────────────────────── */
 header {
-  background: #1a1a2e;
+  background: #1a1410;
   color: #fff;
   padding: 1.25rem 2rem;
   display: flex;
@@ -28,12 +28,12 @@ header {
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: #7ecfff;
+  color: #f97316;
 }
 
 .tagline {
   font-size: 0.9rem;
-  color: #a0aec0;
+  color: #9c8b7a;
 }
 
 /* ─── Main layout ────────────────────────────────── */
@@ -58,7 +58,7 @@ main {
   font-size: 1.15rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: #1a1a2e;
+  color: #1c1410;
 }
 
 .option-group {
@@ -71,7 +71,7 @@ main {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #718096;
+  color: #78716c;
   margin-bottom: 0.65rem;
 }
 
@@ -87,7 +87,7 @@ main {
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #e5ddd5;
   border-radius: 10px;
   padding: 0.85rem 1.2rem;
   cursor: pointer;
@@ -102,12 +102,12 @@ main {
 }
 
 .radio-card:has(input:checked) {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: #ea580c;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
 }
 
 .radio-card:hover {
-  border-color: #93c5fd;
+  border-color: #fb923c;
 }
 
 .card-label {
@@ -117,7 +117,7 @@ main {
 
 .card-price {
   font-size: 0.78rem;
-  color: #718096;
+  color: #78716c;
 }
 
 /* ─── Color picker ───────────────────────────────── */
@@ -132,7 +132,7 @@ main {
   flex-direction: column;
   align-items: center;
   gap: 0.4rem;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #e5ddd5;
   border-radius: 10px;
   padding: 0.75rem 1rem;
   cursor: pointer;
@@ -147,12 +147,12 @@ main {
 }
 
 .color-card:has(input:checked) {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: #ea580c;
+  box-shadow: 0 0 0 3px rgba(234, 88, 12, 0.15);
 }
 
 .color-card:hover {
-  border-color: #93c5fd;
+  border-color: #fb923c;
 }
 
 .color-swatch {
@@ -164,8 +164,8 @@ main {
 }
 
 .color-swatch.white  { background: #f8fafc; }
-.color-swatch.black  { background: #1a1a2e; }
-.color-swatch.blue   { background: #2563eb; }
+.color-swatch.black  { background: #1a1210; }
+.color-swatch.orange { background: #f97316; }
 .color-swatch.red    { background: #dc2626; }
 
 .color-name {
@@ -196,7 +196,7 @@ main {
   justify-content: space-between;
   padding: 0.45rem 0;
   font-size: 0.9rem;
-  border-bottom: 1px solid #f0f0f0;
+  border-bottom: 1px solid #ede8e3;
 }
 
 .summary-list li:last-child {
@@ -204,7 +204,7 @@ main {
 }
 
 .summary-key {
-  color: #718096;
+  color: #78716c;
 }
 
 .summary-val {
@@ -215,7 +215,7 @@ main {
 .summary-divider {
   height: 0;
   border: none;
-  border-top: 2px solid #e2e8f0 !important;
+  border-top: 2px solid #e5ddd5 !important;
   padding: 0 !important;
   margin: 0.25rem 0;
 }
@@ -224,7 +224,7 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #1a1a2e;
+  background: #1a1410;
   color: #fff;
   border-radius: 10px;
   padding: 0.85rem 1rem;
@@ -235,14 +235,14 @@ main {
 
 #total-price {
   font-size: 1.3rem;
-  color: #7ecfff;
+  color: #f97316;
 }
 
 .cta-button {
   display: block;
   width: 100%;
   padding: 0.85rem;
-  background: #3b82f6;
+  background: #ea580c;
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
@@ -253,7 +253,7 @@ main {
 }
 
 .cta-button:hover {
-  background: #2563eb;
+  background: #c2410c;
 }
 
 /* ─── Share section ──────────────────────────────── */
@@ -262,10 +262,10 @@ main {
   width: 100%;
   padding: 0.85rem;
   background: #fff;
-  color: #3b82f6;
+  color: #ea580c;
   font-size: 1rem;
   font-weight: 600;
-  border: 2px solid #3b82f6;
+  border: 2px solid #ea580c;
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s;
@@ -273,7 +273,7 @@ main {
 }
 
 .share-button:hover {
-  background: #eff6ff;
+  background: #fff7ed;
 }
 
 .share-section {
@@ -285,9 +285,9 @@ main {
   width: 100%;
   padding: 0.5rem 0.75rem;
   font-size: 0.8rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #e5ddd5;
   border-radius: 8px;
-  color: #1a1a2e;
+  color: #1c1410;
   background: #f8fafc;
   margin-bottom: 0.5rem;
   overflow: hidden;
@@ -344,9 +344,9 @@ footer {
   text-align: center;
   padding: 1rem;
   font-size: 0.78rem;
-  color: #a0aec0;
+  color: #9c8b7a;
   background: #fff;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #e5ddd5;
 }
 
 /* ─── Responsive ─────────────────────────────────── */
