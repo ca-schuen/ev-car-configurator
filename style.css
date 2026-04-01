@@ -7,8 +7,8 @@
 
 body {
   font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-  background: #f4f6f9;
-  color: #1a1a2e;
+  background: #f5f0e8;
+  color: #2d3a1e;
   min-height: 100vh;
   display: flex;
   flex-direction: column;
@@ -16,7 +16,7 @@ body {
 
 /* ─── Header ─────────────────────────────────────── */
 header {
-  background: #1a1a2e;
+  background: #2d4a22;
   color: #fff;
   padding: 1.25rem 2rem;
   display: flex;
@@ -28,12 +28,12 @@ header {
   font-size: 1.6rem;
   font-weight: 700;
   letter-spacing: 0.04em;
-  color: #7ecfff;
+  color: #c8e6a0;
 }
 
 .tagline {
   font-size: 0.9rem;
-  color: #a0aec0;
+  color: #a8c28a;
 }
 
 /* ─── Main layout ────────────────────────────────── */
@@ -58,7 +58,7 @@ main {
   font-size: 1.15rem;
   font-weight: 600;
   margin-bottom: 1.5rem;
-  color: #1a1a2e;
+  color: #2d4a22;
 }
 
 .option-group {
@@ -71,7 +71,7 @@ main {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.08em;
-  color: #718096;
+  color: #795548;
   margin-bottom: 0.65rem;
 }
 
@@ -102,12 +102,12 @@ main {
 }
 
 .radio-card:has(input:checked) {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: #4a7c2f;
+  box-shadow: 0 0 0 3px rgba(74, 124, 47, 0.15);
 }
 
 .radio-card:hover {
-  border-color: #93c5fd;
+  border-color: #7ab354;
 }
 
 .card-label {
@@ -117,7 +117,7 @@ main {
 
 .card-price {
   font-size: 0.78rem;
-  color: #718096;
+  color: #795548;
 }
 
 /* ─── Color picker ───────────────────────────────── */
@@ -147,12 +147,12 @@ main {
 }
 
 .color-card:has(input:checked) {
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  border-color: #4a7c2f;
+  box-shadow: 0 0 0 3px rgba(74, 124, 47, 0.15);
 }
 
 .color-card:hover {
-  border-color: #93c5fd;
+  border-color: #7ab354;
 }
 
 .color-swatch {
@@ -204,7 +204,7 @@ main {
 }
 
 .summary-key {
-  color: #718096;
+  color: #795548;
 }
 
 .summary-val {
@@ -224,7 +224,7 @@ main {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background: #1a1a2e;
+  background: #2d4a22;
   color: #fff;
   border-radius: 10px;
   padding: 0.85rem 1rem;
@@ -235,14 +235,14 @@ main {
 
 #total-price {
   font-size: 1.3rem;
-  color: #7ecfff;
+  color: #c8e6a0;
 }
 
 .cta-button {
   display: block;
   width: 100%;
   padding: 0.85rem;
-  background: #3b82f6;
+  background: #4a7c2f;
   color: #fff;
   font-size: 1rem;
   font-weight: 600;
@@ -253,7 +253,7 @@ main {
 }
 
 .cta-button:hover {
-  background: #2563eb;
+  background: #2d4a22;
 }
 
 /* ─── Share section ──────────────────────────────── */
@@ -262,10 +262,10 @@ main {
   width: 100%;
   padding: 0.85rem;
   background: #fff;
-  color: #3b82f6;
+  color: #4a7c2f;
   font-size: 1rem;
   font-weight: 600;
-  border: 2px solid #3b82f6;
+  border: 2px solid #4a7c2f;
   border-radius: 10px;
   cursor: pointer;
   transition: background 0.15s;
@@ -273,7 +273,7 @@ main {
 }
 
 .share-button:hover {
-  background: #eff6ff;
+  background: #f1f8e9;
 }
 
 .share-section {
@@ -285,10 +285,10 @@ main {
   width: 100%;
   padding: 0.5rem 0.75rem;
   font-size: 0.8rem;
-  border: 1px solid #e2e8f0;
+  border: 1px solid #d7ccc8;
   border-radius: 8px;
-  color: #1a1a2e;
-  background: #f8fafc;
+  color: #2d3a1e;
+  background: #faf7f2;
   margin-bottom: 0.5rem;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -346,7 +346,7 @@ footer {
   font-size: 0.78rem;
   color: #a0aec0;
   background: #fff;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #d7ccc8;
 }
 
 /* ─── Responsive ─────────────────────────────────── */
